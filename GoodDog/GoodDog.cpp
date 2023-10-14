@@ -1,67 +1,10 @@
-#include <iostream>
-#include "raylib.h"
-#include "WobblyTexture.h"
+#include "GoodDog.h"
 
-#define DOG_WOBBLE_RATE 0.2f
-#define WALL_WOBBLE_RATE 0.75f
-#define HOP_TIMER 0.833333333333
-
-enum Button { N, E, S, W };
-enum CurveType { NE, SE, SW, NW };
-
-struct Floor
+void AddFloor(Game* game, Texture2D& texLine, Texture2D& texPaint, Vector2 start, Vector2 end)
 {
-	float startX;
-	float endX;
-	float Y;
-};
-
-struct DangerBlock
-{
-	Rectangle dimensions;
-	Vector2 startPos;
-	Vector2 endPos;
-	Button button;
-};
-
-struct Elevator
-{
-	float startX;
-	float endX;
-	float startY;
-	float endY;
-	float lerpTime;
-};
-
-struct Reverser
-{
-	Rectangle dimensions;
-	Vector2 pos;
-	float enabled;
-};
-
-struct Curve
-{
-	Vector2 pos;
-	CurveType type;
-};
-
-struct Game
-{
-	Floor floors[256];
-	Curve curves[256];
-	DangerBlock dangerBlocks[256];
-	Elevator elevators[256];
-	Reverser reversers[256];
-};
-
-enum GameState
-{
-	CUTSCENE,
-	GOING,
-	WIN,
-	LOSE
-};
+	game->floors[game->floorsCount++] = Floor { start, end };
+	game->floorRenders[game->floorRendersCount++] = FloorRender(texLine, texPaint, start, end);
+}
 
 int main()
 {
@@ -89,11 +32,13 @@ int main()
 		WobblyTexture("resources/dog_hop2_back.png"),
 	};
 	Texture2D texLine = LoadTexture("resources/line.png");
+	Texture2D texPaint = LoadTexture("resources/paint_blue.png");
+	Texture2D texBG = LoadTexture("resources/bg.png");
 
 	GameState state = CUTSCENE;
 
-	WobblyLine testLine(texLine, { 0.f, 540.f }, { 1280.f, 540.f });
-	WobblyLine testLine2(texLine, { 0.f, 565.f }, { 1280.f, 565.f });
+	Game* game = new Game();
+	AddFloor(game, texLine, texPaint, { 0.f, 552.f }, { 1280.f, 552.f });
 
 	// Cutscene state
 	float cutsceneTimer = 0.f;
@@ -141,7 +86,10 @@ int main()
 		{
 			UpdateMusicStream(music);
 
-			pos.x += (dogFlipped ? -1.f : 1.f) * 240.f * dt;
+			if (pos.x > 1280.f) dogFlipped = true;
+			if (pos.x < 0.f) dogFlipped = false;
+
+			pos.x += (dogFlipped ? -1.f : 1.f) * 280.f * dt;
 
 			hopOffset += (frame == 2 ? -120.f : 120.f) * dt;
 			if (hopOffset > 0.f) hopOffset = 0.f;
@@ -171,18 +119,27 @@ int main()
 
 		texDogBack[frame].Update(dt, false, DOG_WOBBLE_RATE);
 		texDogOutline[frame].Update(dt, true, DOG_WOBBLE_RATE);
-		testLine.Update(dt, WALL_WOBBLE_RATE);
-		testLine2.Update(dt, WALL_WOBBLE_RATE);
 
+		for (int i = 0; i < game->floorRendersCount; i++)
+		{
+			game->floorRenders[i].Update(dt, WALL_WOBBLE_RATE);
+		}
+		
 		BeginDrawing();
 
 		ClearBackground(DARKPURPLE);
+		DrawTexture(texBG, 0, 0, WHITE);
+
 		Vector2 drawPos = { pos.x, pos.y + hopOffset };
 		texDogBack[frame].Draw(drawPos, {dogSpriteScale, dogSpriteScale}, dogSpriteAngle, dogFlipped);
 		texDogOutline[frame].Draw(drawPos, {dogSpriteScale, dogSpriteScale}, dogSpriteAngle, dogFlipped);
 		
-		testLine.Draw();
-		testLine2.Draw();
+		for (int i = 0; i < game->floorRendersCount; i++)
+		{
+			game->floorRenders[i].Draw();
+		}
+
+		DrawFPS(10, 10);
 
 		EndDrawing();
 	}
@@ -193,6 +150,9 @@ int main()
 		texDogBack[i].Unload();
 	}
 	UnloadTexture(texLine);
+	UnloadTexture(texPaint);
 	CloseWindow();
+
+	delete game;
 	return 0;
 }

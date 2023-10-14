@@ -18,12 +18,15 @@
     <ClCompile Include="GoodDog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WobblyTexture.cpp">
+    <ClCompile Include="WobblyRender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="WobblyTexture.h">
+    <ClInclude Include="WobblyRender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GoodDog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

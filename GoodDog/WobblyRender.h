@@ -28,7 +28,21 @@ struct WobblyLine
 	Rectangle srcRects[32] = {};
 	float wobbleAngles[32] = {};
 
+	WobblyLine() {}
 	WobblyLine(Texture2D& lineTex, Vector2 _start, Vector2 _end);
 	void Update(float dt, float wobbleRate);
+	void Draw();
+};
+
+struct PaintLine
+{
+	Texture2D paintTex;
+	int numSegments;
+	Vector2 start;
+	Vector2 end;
+	Rectangle srcRects[32] = {};
+
+	PaintLine() {}
+	PaintLine(Texture2D& _paintTex, Vector2 _start, Vector2 _end);
 	void Draw();
 };
