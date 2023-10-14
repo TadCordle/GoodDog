@@ -21,10 +21,10 @@ void WobblyTexture::Update(float dt, bool stableWobble, float wobbleRate)
 	}
 }
 
-void WobblyTexture::Draw(Vector2 pos, Vector2 scale, float angle)
+void WobblyTexture::Draw(Vector2 pos, Vector2 scale, float angle, bool hFlipped)
 {
-	Rectangle srcRect = { 0.f, 0.f, (float)texture.width, (float)texture.height };
-	Vector2 frameSize = { srcRect.width * wobbleScale.x * scale.x, srcRect.height * wobbleScale.y * scale.y };
+	Vector2 frameSize = { texture.width * wobbleScale.x * scale.x, texture.height * wobbleScale.y * scale.y };
+	Rectangle srcRect = { 0.f, 0.f, (hFlipped ? -1 : 1) * texture.width, texture.height };
 	Rectangle dstRect = { pos.x + wobbleOffset.x * scale.x, pos.y + wobbleOffset.y * scale.y, frameSize.x, frameSize.y };
 	Vector2 origin = { frameSize.x / 2.f, frameSize.y / 2.f };
 	DrawTexturePro(texture, srcRect, dstRect, origin, angle + wobbleAngle, WHITE);

@@ -12,6 +12,6 @@ struct WobblyTexture
 
 	WobblyTexture(const char* _path);
 	void Update(float dt, bool stableWobble, float wobbleRate);
-	void Draw(Vector2 pos, Vector2 scale, float angle);
+	void Draw(Vector2 pos, Vector2 scale, float angle, bool hFlipped = false);
 	void Unload();
 };

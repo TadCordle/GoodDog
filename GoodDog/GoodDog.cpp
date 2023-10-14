@@ -105,19 +105,19 @@ int main()
 			cutsceneTimer += dt;
 			if (cutsceneTimer < 1.f)
 			{
-				printf("Waiting\n");
+				//printf("Waiting\n");
 			}
 			else if (cutsceneTimer < 1.5f)
 			{
-				printf("Pre-throw\n");
+				//printf("Pre-throw\n");
 			}
 			else if (cutsceneTimer < 1.6f)
 			{
-				printf("Throw\n");
+				//printf("Throw\n");
 			}
 			else if (cutsceneTimer < 2.0f)
 			{
-				printf("Fetch!\n");
+				//printf("Fetch!\n");
 			}
 			else
 			{
