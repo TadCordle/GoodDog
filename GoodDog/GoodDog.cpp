@@ -5,6 +5,55 @@
 #define DOG_WOBBLE_RATE 0.2f
 #define HOP_TIMER 0.833333333333
 
+enum Button { N, E, S, W };
+enum CurveType { NE, SE, SW, NW };
+
+struct Floor
+{
+	float startX;
+	float endX;
+	float Y;
+};
+
+struct DangerBlock
+{
+	Rectangle dimensions;
+	Vector2 startPos;
+	Vector2 endPos;
+	Button button;
+};
+
+struct Elevator
+{
+	float startX;
+	float endX;
+	float startY;
+	float endY;
+	float lerpTime;
+};
+
+struct Reverser
+{
+	Rectangle dimensions;
+	Vector2 pos;
+	float enabled;
+};
+
+struct Curve
+{
+	Vector2 pos;
+	CurveType type;
+};
+
+struct Game
+{
+	Floor floors[256];
+	Curve curves[256];
+	DangerBlock dangerBlocks[256];
+	Elevator elevators[256];
+	Reverser reversers[256];
+};
+
 enum GameState
 {
 	CUTSCENE,
