@@ -3,7 +3,15 @@
 #include "WobblyTexture.h"
 
 #define DOG_WOBBLE_RATE 0.2f
-#define HOP_TIMER 0.4166666667;
+#define HOP_TIMER 0.833333333333
+
+enum GameState
+{
+	CUTSCENE,
+	GOING,
+	WIN,
+	LOSE
+};
 
 int main()
 {
@@ -13,22 +21,24 @@ int main()
 	Vector2 pos = { 300.f, 450.f };
 	float dogSpriteScale = 0.75f;
 	float dogSpriteAngle = 0.f;
-
-	float cutsceneTimer = 0.f;
-	float hopTimer = 0.4166666667;
-
 	WobblyTexture texDogOutline[] = {
 		WobblyTexture("resources/dog_outline.png"),
 		WobblyTexture("resources/dog_hop1_outline.png"),
 		WobblyTexture("resources/dog_hop2_outline.png"),
 	};
-
 	WobblyTexture texDogBack[] = { 
 		WobblyTexture("resources/dog_back.png"),
 		WobblyTexture("resources/dog_hop1_back.png"),
 		WobblyTexture("resources/dog_hop2_back.png"),
 	};
 
+	GameState state = CUTSCENE;
+
+	// Cutscene state
+	float cutsceneTimer = 0.f;
+
+	// Gameplay state
+	double hopTimer = -HOP_TIMER / 2.f;
 	int frame = 0;
 	float hopOffset = 0.f;
 
@@ -36,28 +46,57 @@ int main()
 	{
 		float dt = GetFrameTime();
 
-		if (cutsceneTimer < 0)
+		switch (state)
 		{
-			hopTimer -= dt;
-
-			hopOffset += (frame == 2 ? -120.f : 70.f) * dt;
+		case CUTSCENE:
+		{
+			cutsceneTimer += dt;
+			if (cutsceneTimer < 1.f)
+			{
+				printf("Waiting\n");
+			}
+			else if (cutsceneTimer < 1.5f)
+			{
+				printf("Pre-throw\n");
+			}
+			else if (cutsceneTimer < 1.6f)
+			{
+				printf("Throw\n");
+			}
+			else if (cutsceneTimer < 2.0f)
+			{
+				printf("Fetch!\n");
+			}
+			else
+			{
+				printf("Go!\n");
+				frame = 2;
+				state = GOING;
+			}
+			break;
+		}
+		case GOING:
+		{
+			hopOffset += (frame == 2 ? -120.f : 120.f) * dt;
 			if (hopOffset > 0.f) hopOffset = 0.f;
 			if (hopOffset < -20.f) hopOffset = -20.f;
 
-			if (hopTimer <= 0.f)
-			{
-				hopTimer = 0.4166666667f;
-				frame = (frame == 2 ? 1 : 2);
-			}
+			hopTimer += dt;
+			double timeWithinBeat = remainder(hopTimer, HOP_TIMER);
+			frame = timeWithinBeat >= 0.0 ? 1 : 2;
+
+			break;
 		}
-		else if (cutsceneTimer > 2.f)
+		case WIN:
 		{
-			cutsceneTimer = -1.f;
-			frame = 2;
+			// TODO
+			break;
 		}
-		else
+		case LOSE:
 		{
-			cutsceneTimer += dt;
+			// TODO
+			break;
+		}
 		}
 
 		texDogBack[frame].Update(dt, false, DOG_WOBBLE_RATE);
