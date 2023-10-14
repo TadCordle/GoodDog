@@ -3,6 +3,7 @@
 #include "WobblyTexture.h"
 
 #define DOG_WOBBLE_RATE 0.2f
+#define WALL_WOBBLE_RATE 0.75f
 #define HOP_TIMER 0.833333333333
 
 enum Button { N, E, S, W };
@@ -75,6 +76,8 @@ int main()
 	Vector2 pos = { 300.f, 450.f };
 	float dogSpriteScale = 0.75f;
 	float dogSpriteAngle = 0.f;
+	bool dogFlipped = true;
+
 	WobblyTexture texDogOutline[] = {
 		WobblyTexture("resources/dog_outline.png"),
 		WobblyTexture("resources/dog_hop1_outline.png"),
@@ -85,8 +88,12 @@ int main()
 		WobblyTexture("resources/dog_hop1_back.png"),
 		WobblyTexture("resources/dog_hop2_back.png"),
 	};
+	Texture2D texLine = LoadTexture("resources/line.png");
 
 	GameState state = CUTSCENE;
+
+	WobblyLine testLine(texLine, { 0.f, 540.f }, { 1280.f, 540.f });
+	WobblyLine testLine2(texLine, { 0.f, 565.f }, { 1280.f, 565.f });
 
 	// Cutscene state
 	float cutsceneTimer = 0.f;
@@ -116,6 +123,7 @@ int main()
 			else if (cutsceneTimer < 1.6f)
 			{
 				//printf("Throw\n");
+				dogFlipped = false;
 			}
 			else if (cutsceneTimer < 2.0f)
 			{
@@ -132,6 +140,8 @@ int main()
 		case GOING:
 		{
 			UpdateMusicStream(music);
+
+			pos.x += (dogFlipped ? -1.f : 1.f) * 240.f * dt;
 
 			hopOffset += (frame == 2 ? -120.f : 120.f) * dt;
 			if (hopOffset > 0.f) hopOffset = 0.f;
@@ -161,13 +171,18 @@ int main()
 
 		texDogBack[frame].Update(dt, false, DOG_WOBBLE_RATE);
 		texDogOutline[frame].Update(dt, true, DOG_WOBBLE_RATE);
+		testLine.Update(dt, WALL_WOBBLE_RATE);
+		testLine2.Update(dt, WALL_WOBBLE_RATE);
 
 		BeginDrawing();
 
 		ClearBackground(DARKPURPLE);
 		Vector2 drawPos = { pos.x, pos.y + hopOffset };
-		texDogBack[frame].Draw(drawPos, {dogSpriteScale, dogSpriteScale}, dogSpriteAngle);
-		texDogOutline[frame].Draw(drawPos, {dogSpriteScale, dogSpriteScale}, dogSpriteAngle);
+		texDogBack[frame].Draw(drawPos, {dogSpriteScale, dogSpriteScale}, dogSpriteAngle, dogFlipped);
+		texDogOutline[frame].Draw(drawPos, {dogSpriteScale, dogSpriteScale}, dogSpriteAngle, dogFlipped);
+		
+		testLine.Draw();
+		testLine2.Draw();
 
 		EndDrawing();
 	}
@@ -177,6 +192,7 @@ int main()
 		texDogOutline[i].Unload();
 		texDogBack[i].Unload();
 	}
+	UnloadTexture(texLine);
 	CloseWindow();
 	return 0;
 }
