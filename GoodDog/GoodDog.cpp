@@ -16,7 +16,10 @@ enum GameState
 int main()
 {
 	InitWindow(1280, 720, "Good Dog");
+	InitAudioDevice();
 	SetTargetFPS(120);
+
+	Music music = LoadMusicStream("resources/music.wav");
 
 	Vector2 pos = { 300.f, 450.f };
 	float dogSpriteScale = 0.75f;
@@ -69,7 +72,7 @@ int main()
 			}
 			else
 			{
-				printf("Go!\n");
+				PlayMusicStream(music);
 				frame = 2;
 				state = GOING;
 			}
@@ -77,6 +80,8 @@ int main()
 		}
 		case GOING:
 		{
+			UpdateMusicStream(music);
+
 			hopOffset += (frame == 2 ? -120.f : 120.f) * dt;
 			if (hopOffset > 0.f) hopOffset = 0.f;
 			if (hopOffset < -20.f) hopOffset = -20.f;
@@ -84,16 +89,20 @@ int main()
 			hopTimer += dt;
 			double timeWithinBeat = remainder(hopTimer, HOP_TIMER);
 			frame = timeWithinBeat >= 0.0 ? 1 : 2;
+			// TODO: Use GetMusicTimePlayed(music) to ensure we're synced up, in case someone drags the window and pauses the game or something
 
 			break;
 		}
 		case WIN:
 		{
+			
 			// TODO
 			break;
 		}
 		case LOSE:
 		{
+			StopMusicStream(music);
+
 			// TODO
 			break;
 		}
