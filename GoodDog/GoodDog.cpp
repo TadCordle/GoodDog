@@ -65,8 +65,10 @@ enum GameState
 int main()
 {
 	InitWindow(1280, 720, "Good Dog");
-	InitAudioDevice();
 	SetTargetFPS(120);
+	//ToggleFullscreen();
+
+	InitAudioDevice();
 
 	Music music = LoadMusicStream("resources/music.wav");
 
