@@ -16,7 +16,7 @@ WobblyTexture::WobblyTexture(const char* _path)
 {
 	texture = LoadTexture(_path);
 	wobbleTime = 0.f;
-	state = 0;
+	wobbleState = 0;
 }
 
 void WobblyTexture::Update(float dt, float wobbleRate)
@@ -25,17 +25,17 @@ void WobblyTexture::Update(float dt, float wobbleRate)
 	if (wobbleTime <= 0.f)
 	{
 		wobbleTime = wobbleRate;
-		state = GetRandomValue(0, 9999);
+		wobbleState = GetRandomValue(0, 9999);
 	}
 }
 
 void WobblyTexture::Draw(Vector2 pos, Vector2 scale, float angle, bool hFlipped, bool stableWobble)
 {
-	float randOffX = hash_float(state) * 10.f - 5.f;
-	float randOffY = hash_float(state) * 10.f - 5.f;
-	float randScaleX = stableWobble ? 1.f : (hash_float(state) * 0.1f + 0.95f);
-	float randScaleY = stableWobble ? 1.f : (hash_float(state) * 0.1f + 0.95f);
-	float randAngle = stableWobble ? 0.f : (hash_float(state) * 2.f - 1.f);
+	float randOffX = hash_float(wobbleState) * 10.f - 5.f;
+	float randOffY = hash_float(wobbleState) * 10.f - 5.f;
+	float randScaleX = stableWobble ? 1.f : (hash_float(wobbleState) * 0.1f + 0.95f);
+	float randScaleY = stableWobble ? 1.f : (hash_float(wobbleState) * 0.1f + 0.95f);
+	float randAngle = stableWobble ? 0.f : (hash_float(wobbleState) * 2.f - 1.f);
 
 	Vector2 frameSize = { texture.width * randScaleX * scale.x, texture.height * randScaleY * scale.y };
 	Rectangle srcRect = { 0.f, 0.f, (hFlipped ? -1.f : 1.f) * (float)texture.width, (float)texture.height };
@@ -49,13 +49,10 @@ void WobblyTexture::Unload()
 	UnloadTexture(texture);
 }
 
-WobblyLine::WobblyLine(Texture2D& _lineTex, Vector2 _start, Vector2 _end)
+WobblyLine::WobblyLine()
 {
-	lineTex = _lineTex;
 	wobbleTime = 0.f;
-	start = _start;
-	end = _end;
-	state = GetRandomValue(0, 9999);
+	wobbleState = GetRandomValue(0, 9999);
 }
 
 void WobblyLine::Update(float dt, float wobbleRate)
@@ -63,19 +60,19 @@ void WobblyLine::Update(float dt, float wobbleRate)
 	wobbleTime -= dt;
 	if (wobbleTime <= 0.f)
 	{
-		state = GetRandomValue(0, 9999);
+		wobbleState = GetRandomValue(0, 9999);
 		wobbleTime = wobbleRate;
 	}
 }
 
-void WobblyLine::Draw()
+void WobblyLine::Draw(Texture2D& lineTex, Vector2 start, Vector2 end)
 {
 	float totalLength = Vector2Distance(start, end);
 	int numSegments = (int)(totalLength / 128) + 1;
 	Vector2 s = start;
 	for (int i = 0; i < numSegments; i++)
 	{
-		float wobble = hash_float(state + i);
+		float wobble = hash_float(wobbleState + i);
 		Vector2 e = (i == numSegments - 1) ? end : Vector2Lerp(start, end, 128 * (i + 1) / totalLength);
 		float segmentSize = Vector2Distance(s, e);
 		Rectangle srcRect = { wobble * 384.f, 0.f, 128.f, 32.f};
@@ -87,14 +84,7 @@ void WobblyLine::Draw()
 	}
 }
 
-PaintLine::PaintLine(Texture2D& _paintTex, Vector2 _start, Vector2 _end)
-{
-	paintTex = _paintTex;
-	start = _start;
-	end = _end;
-}
-
-void PaintLine::Draw()
+void DrawPaintLine(Texture2D& paintTex, Vector2 start, Vector2 end)
 {
 	float totalLength = Vector2Distance(start, end);
 	if (totalLength < 256.f)
@@ -124,20 +114,6 @@ void PaintLine::Draw()
 	}
 }
 
-WobblyRectangle::WobblyRectangle(Texture2D& _lineTex, Texture2D& _paintTex, Vector2 _pos, Vector2 _size)
-{
-	Vector2 topLeft  = { _pos.x - _size.x / 2.f, _pos.y - _size.y / 2.f };
-	Vector2 topRight = { _pos.x + _size.x / 2.f, _pos.y - _size.y / 2.f };
-	Vector2 botLeft  = { _pos.x - _size.x / 2.f, _pos.y + _size.y / 2.f };
-	Vector2 botRight = { _pos.x + _size.x / 2.f, _pos.y + _size.y / 2.f };
-	pos = topLeft;
-	top = WobblyLine(_lineTex, topLeft, topRight);
-	bottom = WobblyLine(_lineTex, botLeft, botRight);
-	left = WobblyLine(_lineTex, topLeft, botLeft);
-	right = WobblyLine(_lineTex, topRight, botRight);
-	paintTex = _paintTex;
-}
-
 void WobblyRectangle::Update(float dt, float wobbleRate)
 {
 	top.Update(dt, wobbleRate);
@@ -146,27 +122,27 @@ void WobblyRectangle::Update(float dt, float wobbleRate)
 	right.Update(dt, wobbleRate);
 }
 
-void WobblyRectangle::Draw()
+void WobblyRectangle::Draw(Texture2D& lineTex, Texture2D& paintTex, Vector2 topLeft, Vector2 botRight)
 {
-	float sizeX = right.start.x - left.start.x;
-	float sizeY = bottom.start.y - top.start.y;
+	float sizeX = botRight.x - topLeft.x;
+	float sizeY = botRight.y - topLeft.y;
 	int numFillsX = (int)(sizeX / 256.f) + 1;
 	int numFillsY = (int)(sizeY / 256.f) + 1;
 	Vector2 srcRectSize = { numFillsX == 1 ? sizeX : 256.f, numFillsY == 1 ? sizeY : 256.f };
 	Rectangle srcRect = { (256.f - srcRectSize.x) / 2.f, (256.f - srcRectSize.y) / 2.f, srcRectSize.x, srcRectSize.y };
 	for (int x = 0; x < numFillsX; x++)
 	{
-		float dstX = x == numFillsX - 1 ? (right.start.x - srcRectSize.x) : (x * 256.f + pos.x);
+		float dstX = x == numFillsX - 1 ? (botRight.x - srcRectSize.x) : (x * 256.f + topLeft.x);
 		for (int y = 0; y < numFillsY; y++)
 		{
-			float dstY = y == numFillsY - 1 ? (bottom.start.y - srcRectSize.y) : (y * 256.f + pos.y);
+			float dstY = y == numFillsY - 1 ? (botRight.y - srcRectSize.y) : (y * 256.f + topLeft.y);
 			Rectangle dstRect = { dstX, dstY, srcRectSize.x, srcRectSize.y };
 			DrawTexturePro(paintTex, srcRect, dstRect, { 0.f, 0.f }, 0.f, WHITE);
 		}
 	}
 
-	top.Draw();
-	bottom.Draw();
-	left.Draw();
-	right.Draw();
+	top.Draw(lineTex, topLeft, { botRight.x, topLeft.y });
+	bottom.Draw(lineTex, { topLeft.x, botRight.y }, botRight);
+	left.Draw(lineTex, topLeft, { topLeft.x, botRight.y });
+	right.Draw(lineTex, { botRight.x, topLeft.y }, botRight);
 }

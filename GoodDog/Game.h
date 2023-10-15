@@ -13,13 +13,13 @@ enum CurveType { NE, SE, SW, NW };
 
 struct Floor
 {
+	Vector2 start = {}, end = {};
 	WobblyLine line1, line2;
-	PaintLine solid;
 
 	Floor() {}
-	Floor(Texture2D& lineTex, Texture2D& paintTex, Vector2 start, Vector2 end);
+	Floor(Vector2 _start, Vector2 _end);
 	void Update(float dt, float wobbleRate);
-	void Draw();
+	void Draw(Texture2D& lineTex, Texture2D& paintTex);
 };
 
 struct DangerBlock

@@ -35,7 +35,7 @@ int main()
 	Game* game = new Game(texLine, texPaintBlue);
 	game->AddFloor({ 0.f, 552.f }, { 1280.f, 552.f });
 
-	WobblyRectangle rectTest(texLine, texPaintGray, { 800.f, 400.f }, { 100.f, 280.f });
+	WobblyRectangle rectTest;
 
 	// Cutscene state
 	float cutsceneTimer = 0.f;
@@ -132,9 +132,9 @@ int main()
 
 		for (int i = 0; i < game->floorsCount; i++)
 		{
-			game->floors[i].Draw();
+			game->floors[i].Draw(texLine, texPaintBlue);
 		}
-		rectTest.Draw();
+		rectTest.Draw(texLine, texPaintGray, { 750.f, 260.f }, { 850.f, 540.f });
 		
 		Vector2 drawPos = { pos.x, pos.y + hopOffset };
 		texDogBack[frame].Draw(drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped, false);
