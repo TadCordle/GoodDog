@@ -26,15 +26,16 @@ int main()
 		WobblyTexture("resources/dog_hop2_back.png"),
 	};
 	Texture2D texLine = LoadTexture("resources/line.png");
-	Texture2D texPaint = LoadTexture("resources/paint_blue.png");
+	Texture2D texPaintBlue = LoadTexture("resources/paint_blue.png");
+	Texture2D texPaintGray = LoadTexture("resources/paint_gray.png");
 	Texture2D texBG = LoadTexture("resources/bg.png");
 
 	GameState state = CUTSCENE;
 
-	Game* game = new Game(texLine, texPaint);
+	Game* game = new Game(texLine, texPaintBlue);
 	game->AddFloor({ 0.f, 552.f }, { 1280.f, 552.f });
 
-	WobblyRectangle rectTest(texLine, texPaint, { 800.f, 400.f }, { 100.f, 280.f });
+	WobblyRectangle rectTest(texLine, texPaintGray, { 800.f, 400.f }, { 100.f, 280.f });
 
 	// Cutscene state
 	float cutsceneTimer = 0.f;
@@ -47,7 +48,7 @@ int main()
 	while (!WindowShouldClose())
 	{
 		float dt = GetFrameTime();
-		if (dt > 0.1f) dt = 0.1f;
+		if (dt > 0.03333333f) dt = 0.03333333f;
 
 		switch (state)
 		{
@@ -129,15 +130,15 @@ int main()
 		ClearBackground(DARKPURPLE);
 		DrawTexture(texBG, 0, 0, WHITE);
 
-		Vector2 drawPos = { pos.x, pos.y + hopOffset };
-		texDogBack[frame].Draw(drawPos, {dogSpriteScale, dogSpriteScale}, dogSpriteAngle, dogFlipped);
-		texDogOutline[frame].Draw(drawPos, {dogSpriteScale, dogSpriteScale}, dogSpriteAngle, dogFlipped);
-		
 		for (int i = 0; i < game->floorRendersCount; i++)
 		{
 			game->floorRenders[i].Draw();
 		}
 		rectTest.Draw();
+		
+		Vector2 drawPos = { pos.x, pos.y + hopOffset };
+		texDogBack[frame].Draw(drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped);
+		texDogOutline[frame].Draw(drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped);
 
 		//DrawFPS(10, 10);
 
@@ -150,7 +151,7 @@ int main()
 		texDogBack[i].Unload();
 	}
 	UnloadTexture(texLine);
-	UnloadTexture(texPaint);
+	UnloadTexture(texPaintBlue);
 	CloseWindow();
 
 	delete game;

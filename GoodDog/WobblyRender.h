@@ -50,7 +50,9 @@ struct PaintLine
 struct WobblyRectangle
 {
 	WobblyLine top, bottom, left, right;
-	Rectangle fillRects[16] = {};
+	Texture2D paintTex;
+	Vector2 srcRectSize = {};
+	Vector2 pos = {};
 	int numFillsX = 0;
 	int numFillsY = 0;
 

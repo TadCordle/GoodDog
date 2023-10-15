@@ -128,13 +128,16 @@ WobblyRectangle::WobblyRectangle(Texture2D& _lineTex, Texture2D& _paintTex, Vect
 	Vector2 topRight = { _pos.x + _size.x / 2.f, _pos.y - _size.y / 2.f };
 	Vector2 botLeft  = { _pos.x - _size.x / 2.f, _pos.y + _size.y / 2.f };
 	Vector2 botRight = { _pos.x + _size.x / 2.f, _pos.y + _size.y / 2.f };
+	pos = topLeft;
 	top = WobblyLine(_lineTex, topLeft, topRight);
 	bottom = WobblyLine(_lineTex, botLeft, botRight);
 	left = WobblyLine(_lineTex, topLeft, botLeft);
 	right = WobblyLine(_lineTex, topRight, botRight);
+	paintTex = _paintTex;
 
 	numFillsX = (int)(_size.x / 256.f) + 1;
 	numFillsY = (int)(_size.y / 256.f) + 1;
+	srcRectSize = { numFillsX == 1 ? _size.x : 256.f, numFillsY == 1 ? _size.y : 256.f };
 }
 
 void WobblyRectangle::Update(float dt, float wobbleRate)
@@ -147,7 +150,18 @@ void WobblyRectangle::Update(float dt, float wobbleRate)
 
 void WobblyRectangle::Draw()
 {
-	// TODO: Draw fill
+	Rectangle srcRect = { (256.f - srcRectSize.x) / 2.f, (256.f - srcRectSize.y) / 2.f, srcRectSize.x, srcRectSize.y };
+	for (int x = 0; x < numFillsX; x++)
+	{
+		float dstX = x == numFillsX - 1 ? (right.start.x - srcRectSize.x) : (x * 256.f + pos.x);
+		for (int y = 0; y < numFillsY; y++)
+		{
+			float dstY = y == numFillsY - 1 ? (bottom.start.y - srcRectSize.y) : (y * 256.f + pos.y);
+			Rectangle dstRect = { dstX, dstY, srcRectSize.x, srcRectSize.y };
+			DrawTexturePro(paintTex, srcRect, dstRect, { 0.f, 0.f }, 0.f, WHITE);
+		}
+	}
+
 	top.Draw();
 	bottom.Draw();
 	left.Draw();
