@@ -115,8 +115,8 @@ int main()
 		}
 		}
 
-		texDogBack[frame].Update(dt, false, DOG_WOBBLE_RATE);
-		texDogOutline[frame].Update(dt, true, DOG_WOBBLE_RATE);
+		texDogBack[frame].Update(dt, DOG_WOBBLE_RATE);
+		texDogOutline[frame].Update(dt, DOG_WOBBLE_RATE);
 
 		rectTest.Update(dt, WALL_WOBBLE_RATE);
 
@@ -137,8 +137,8 @@ int main()
 		rectTest.Draw();
 		
 		Vector2 drawPos = { pos.x, pos.y + hopOffset };
-		texDogBack[frame].Draw(drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped);
-		texDogOutline[frame].Draw(drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped);
+		texDogBack[frame].Draw(drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped, false);
+		texDogOutline[frame].Draw(drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped, true);
 
 		//DrawFPS(10, 10);
 

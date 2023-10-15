@@ -3,30 +3,28 @@
 #include "raylib.h"
 #include "raymath.h"
 #include <assert.h>
+#include <stdio.h>
+#include <stdint.h>
 
 struct WobblyTexture
 {
 	Texture2D texture;
-	float wobbleAngle;
 	float wobbleTime;
-	Vector2 wobbleOffset;
-	Vector2 wobbleScale;
+	int state;
 
 	WobblyTexture(const char* _path);
-	void Update(float dt, bool stableWobble, float wobbleRate);
-	void Draw(Vector2 pos, Vector2 scale, float angle, bool hFlipped = false);
+	void Update(float dt, float wobbleRate);
+	void Draw(Vector2 pos, Vector2 scale, float angle, bool hFlipped = false, bool stableWobble = false);
 	void Unload();
 };
 
 struct WobblyLine
 {
+	Vector2 start = {};
+	Vector2 end = {};
+	float wobbleTime = 0.f;
+	int state = 0;
 	Texture2D lineTex;
-	float wobbleTime;
-	int numSegments;
-	Vector2 start;
-	Vector2 end;
-	Rectangle srcRects[32] = {};
-	float wobbleAngles[32] = {};
 
 	WobblyLine() {}
 	WobblyLine(Texture2D& lineTex, Vector2 _start, Vector2 _end);
@@ -37,10 +35,8 @@ struct WobblyLine
 struct PaintLine
 {
 	Texture2D paintTex;
-	int numSegments;
-	Vector2 start;
-	Vector2 end;
-	Rectangle srcRects[32] = {};
+	Vector2 start = {};
+	Vector2 end = {};
 
 	PaintLine() {}
 	PaintLine(Texture2D& _paintTex, Vector2 _start, Vector2 _end);
