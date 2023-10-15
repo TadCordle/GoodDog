@@ -136,7 +136,6 @@ WobblyRectangle::WobblyRectangle(Texture2D& _lineTex, Texture2D& _paintTex, Vect
 	left = WobblyLine(_lineTex, topLeft, botLeft);
 	right = WobblyLine(_lineTex, topRight, botRight);
 	paintTex = _paintTex;
-
 }
 
 void WobblyRectangle::Update(float dt, float wobbleRate)
