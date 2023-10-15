@@ -53,9 +53,9 @@ WobblyLine::WobblyLine(Texture2D& _lineTex, Vector2 _start, Vector2 _end)
 {
 	lineTex = _lineTex;
 	wobbleTime = 0.f;
-
 	start = _start;
 	end = _end;
+	state = GetRandomValue(0, 9999);
 }
 
 void WobblyLine::Update(float dt, float wobbleRate)
@@ -137,9 +137,6 @@ WobblyRectangle::WobblyRectangle(Texture2D& _lineTex, Texture2D& _paintTex, Vect
 	right = WobblyLine(_lineTex, topRight, botRight);
 	paintTex = _paintTex;
 
-	numFillsX = (int)(_size.x / 256.f) + 1;
-	numFillsY = (int)(_size.y / 256.f) + 1;
-	srcRectSize = { numFillsX == 1 ? _size.x : 256.f, numFillsY == 1 ? _size.y : 256.f };
 }
 
 void WobblyRectangle::Update(float dt, float wobbleRate)
@@ -152,6 +149,11 @@ void WobblyRectangle::Update(float dt, float wobbleRate)
 
 void WobblyRectangle::Draw()
 {
+	float sizeX = right.start.x - left.start.x;
+	float sizeY = bottom.start.y - top.start.y;
+	int numFillsX = (int)(sizeX / 256.f) + 1;
+	int numFillsY = (int)(sizeY / 256.f) + 1;
+	Vector2 srcRectSize = { numFillsX == 1 ? sizeX : 256.f, numFillsY == 1 ? sizeY : 256.f };
 	Rectangle srcRect = { (256.f - srcRectSize.x) / 2.f, (256.f - srcRectSize.y) / 2.f, srcRectSize.x, srcRectSize.y };
 	for (int x = 0; x < numFillsX; x++)
 	{

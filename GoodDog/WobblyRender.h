@@ -22,9 +22,9 @@ struct WobblyLine
 {
 	Vector2 start = {};
 	Vector2 end = {};
+	Texture2D lineTex;
 	float wobbleTime = 0.f;
 	int state = 0;
-	Texture2D lineTex;
 
 	WobblyLine() {}
 	WobblyLine(Texture2D& lineTex, Vector2 _start, Vector2 _end);
@@ -34,9 +34,9 @@ struct WobblyLine
 
 struct PaintLine
 {
-	Texture2D paintTex;
 	Vector2 start = {};
 	Vector2 end = {};
+	Texture2D paintTex;
 
 	PaintLine() {}
 	PaintLine(Texture2D& _paintTex, Vector2 _start, Vector2 _end);
@@ -47,10 +47,7 @@ struct WobblyRectangle
 {
 	WobblyLine top, bottom, left, right;
 	Texture2D paintTex;
-	Vector2 srcRectSize = {};
 	Vector2 pos = {};
-	int numFillsX = 0;
-	int numFillsY = 0;
 
 	WobblyRectangle() {}
 	WobblyRectangle(Texture2D& _lineTex, Texture2D& _paintTex, Vector2 _pos, Vector2 _size);
