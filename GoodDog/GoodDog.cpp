@@ -120,9 +120,9 @@ int main()
 
 		rectTest.Update(dt, WALL_WOBBLE_RATE);
 
-		for (int i = 0; i < game->floorRendersCount; i++)
+		for (int i = 0; i < game->floorsCount; i++)
 		{
-			game->floorRenders[i].Update(dt, WALL_WOBBLE_RATE);
+			game->floors[i].Update(dt, WALL_WOBBLE_RATE);
 		}
 		
 		BeginDrawing();
@@ -130,9 +130,9 @@ int main()
 		ClearBackground(DARKPURPLE);
 		DrawTexture(texBG, 0, 0, WHITE);
 
-		for (int i = 0; i < game->floorRendersCount; i++)
+		for (int i = 0; i < game->floorsCount; i++)
 		{
-			game->floorRenders[i].Draw();
+			game->floors[i].Draw();
 		}
 		rectTest.Draw();
 		
