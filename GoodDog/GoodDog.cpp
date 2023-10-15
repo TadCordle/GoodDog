@@ -1,10 +1,4 @@
-#include "GoodDog.h"
-
-void AddFloor(Game* game, Texture2D& texLine, Texture2D& texPaint, Vector2 start, Vector2 end)
-{
-	game->floors[game->floorsCount++] = Floor { start, end };
-	game->floorRenders[game->floorRendersCount++] = FloorRender(texLine, texPaint, start, end);
-}
+#include "Game.h"
 
 int main()
 {
@@ -37,8 +31,10 @@ int main()
 
 	GameState state = CUTSCENE;
 
-	Game* game = new Game();
-	AddFloor(game, texLine, texPaint, { 0.f, 552.f }, { 1280.f, 552.f });
+	Game* game = new Game(texLine, texPaint);
+	game->AddFloor({ 0.f, 552.f }, { 1280.f, 552.f });
+
+	WobblyRectangle rectTest(texLine, texPaint, { 800.f, 400.f }, { 100.f, 280.f });
 
 	// Cutscene state
 	float cutsceneTimer = 0.f;
@@ -51,6 +47,7 @@ int main()
 	while (!WindowShouldClose())
 	{
 		float dt = GetFrameTime();
+		if (dt > 0.1f) dt = 0.1f;
 
 		switch (state)
 		{
@@ -91,7 +88,7 @@ int main()
 
 			pos.x += (dogFlipped ? -1.f : 1.f) * 280.f * dt;
 
-			hopOffset += (frame == 2 ? -120.f : 120.f) * dt;
+			hopOffset += (frame == 2 ? -100.f : 100.f) * dt;
 			if (hopOffset > 0.f) hopOffset = 0.f;
 			if (hopOffset < -20.f) hopOffset = -20.f;
 
@@ -120,6 +117,8 @@ int main()
 		texDogBack[frame].Update(dt, false, DOG_WOBBLE_RATE);
 		texDogOutline[frame].Update(dt, true, DOG_WOBBLE_RATE);
 
+		rectTest.Update(dt, WALL_WOBBLE_RATE);
+
 		for (int i = 0; i < game->floorRendersCount; i++)
 		{
 			game->floorRenders[i].Update(dt, WALL_WOBBLE_RATE);
@@ -138,8 +137,9 @@ int main()
 		{
 			game->floorRenders[i].Draw();
 		}
+		rectTest.Draw();
 
-		DrawFPS(10, 10);
+		//DrawFPS(10, 10);
 
 		EndDrawing();
 	}

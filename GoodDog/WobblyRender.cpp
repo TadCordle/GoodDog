@@ -121,3 +121,35 @@ void PaintLine::Draw()
 		}
 	}
 }
+
+WobblyRectangle::WobblyRectangle(Texture2D& _lineTex, Texture2D& _paintTex, Vector2 _pos, Vector2 _size)
+{
+	Vector2 topLeft  = { _pos.x - _size.x / 2.f, _pos.y - _size.y / 2.f };
+	Vector2 topRight = { _pos.x + _size.x / 2.f, _pos.y - _size.y / 2.f };
+	Vector2 botLeft  = { _pos.x - _size.x / 2.f, _pos.y + _size.y / 2.f };
+	Vector2 botRight = { _pos.x + _size.x / 2.f, _pos.y + _size.y / 2.f };
+	top = WobblyLine(_lineTex, topLeft, topRight);
+	bottom = WobblyLine(_lineTex, botLeft, botRight);
+	left = WobblyLine(_lineTex, topLeft, botLeft);
+	right = WobblyLine(_lineTex, topRight, botRight);
+
+	numFillsX = (int)(_size.x / 256.f) + 1;
+	numFillsY = (int)(_size.y / 256.f) + 1;
+}
+
+void WobblyRectangle::Update(float dt, float wobbleRate)
+{
+	top.Update(dt, wobbleRate);
+	bottom.Update(dt, wobbleRate);
+	left.Update(dt, wobbleRate);
+	right.Update(dt, wobbleRate);
+}
+
+void WobblyRectangle::Draw()
+{
+	// TODO: Draw fill
+	top.Draw();
+	bottom.Draw();
+	left.Draw();
+	right.Draw();
+}

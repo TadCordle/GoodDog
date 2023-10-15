@@ -46,3 +46,16 @@ struct PaintLine
 	PaintLine(Texture2D& _paintTex, Vector2 _start, Vector2 _end);
 	void Draw();
 };
+
+struct WobblyRectangle
+{
+	WobblyLine top, bottom, left, right;
+	Rectangle fillRects[16] = {};
+	int numFillsX = 0;
+	int numFillsY = 0;
+
+	WobblyRectangle() {}
+	WobblyRectangle(Texture2D& _lineTex, Texture2D& _paintTex, Vector2 _pos, Vector2 _size);
+	void Update(float dt, float wobbleRate);
+	void Draw();
+};

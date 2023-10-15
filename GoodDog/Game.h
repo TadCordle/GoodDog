@@ -22,7 +22,7 @@ struct FloorRender
 	WobblyLine line1, line2;
 	PaintLine solid;
 
-	FloorRender(){}
+	FloorRender() {}
 	FloorRender(Texture2D& lineTex, Texture2D& paintTex, Vector2 start, Vector2 end)
 	{
 		line1 = WobblyLine(lineTex, { start.x, start.y - 12.f }, { end.x, end.y - 12.f });
@@ -78,14 +78,25 @@ struct Curve
 	CurveType type;
 };
 
+enum GameState
+{
+	CUTSCENE,
+	GOING,
+	WIN,
+	LOSE
+};
+
 struct Game
 {
+	Texture2D texLine;
+	Texture2D texPaint;
+
 	Floor floors[256] = {};
 	Curve curves[256] = {};
 	DangerBlock dangerBlocks[256] = {};
 	Elevator elevators[256] = {};
 	Reverser reversers[256] = {};
-	
+
 	FloorRender floorRenders[256] = {};
 
 	int floorsCount = 0;
@@ -97,13 +108,6 @@ struct Game
 	int floorRendersCount = 0;
 
 	Game() {}
+	Game(Texture2D& _texLine, Texture2D& _texPaint) { texLine = _texLine; texPaint = _texPaint; }
+	void AddFloor(Vector2 start, Vector2 end);
 };
-
-enum GameState
-{
-	CUTSCENE,
-	GOING,
-	WIN,
-	LOSE
-};
-
