@@ -163,7 +163,7 @@ int main()
 			if (minFloorDist == FLT_MAX || minFloorDist > 100.f)
 			{
 				// Fall
-				fallingSpeed += 9.f;
+				fallingSpeed += 1000.f * dt;
 				pos = Vector2Add(pos, Vector2Scale(dogUp, -fallingSpeed * dt));
 			}
 			else
