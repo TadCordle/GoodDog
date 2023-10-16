@@ -30,6 +30,8 @@ int main()
 	Texture2D texLine = LoadTexture("resources/line.png");
 	Texture2D texPaintBlue = LoadTexture("resources/paint_blue.png");
 	Texture2D texPaintGray = LoadTexture("resources/paint_gray.png");
+	Texture2D texPaintLightGreen = LoadTexture("resources/paint_lightgreen.png");
+	Texture2D texPaintLightBlue = LoadTexture("resources/paint_lightblue.png");
 	Texture2D texBG = LoadTexture("resources/bg.png");
 
 	GameState state = CUTSCENE;
@@ -37,6 +39,7 @@ int main()
 	Game* game = new Game();
 	game->AddFloor({ 0.f, 300.f }, { 1280.f, 552.f });
 	game->AddFloor({ 0.f, 552.f }, { 1280.f, 300.f });
+	game->AddElevator({ 200.f, 300.f }, { 600.f, 300.f }, { 200.f, 300.f }, { 600.f, 600.f }, 0.9f, Button::W);
 
 	game->camera.offset = { 0.f, 0.f };
 	game->camera.rotation = 0.f;
@@ -60,6 +63,15 @@ int main()
 		if (dt > 0.03333333f) dt = 0.03333333f;
 
 		Rectangle dogHitBox = { pos.x - 64.f, pos.y - 32.f, 128.f, 96.f };
+
+		for (int i = 0; i < game->floorsCount; i++)
+		{
+			game->floors[i].Update(dt, WALL_WOBBLE_RATE);
+		}
+		for (int i = 0; i < game->elevatorsCount; i++)
+		{
+			game->elevators[i].Update(dt, WALL_WOBBLE_RATE);
+		}
 
 		switch (state)
 		{
@@ -114,19 +126,39 @@ int main()
 
 			// TODO: Check if walking over curve; initiate rotation if so
 
+			// Check if we're standing on anything
 			float minFloorDist = FLT_MAX;
 			Vector2 minPos = {};
 
-			// TODO: Check if "above" elevator, if so match height
+			// Elevators
+			for (int i = 0; i < game->elevatorsCount; i++)
+			{
+				Elevator& elevator = game->elevators[i];
+				Vector2 start = elevator.GetCurrentStart();
+				Vector2 end = elevator.GetCurrentEnd();
+				Vector2 floorCenter = Vector2Lerp(start, end, 0.5f);
+				float dogXToFloor = Vector2DotProduct(Vector2Subtract(pos, floorCenter), dogRight);
+				float floorLength = Vector2DotProduct(Vector2Subtract(end, start), dogRight);
+				if (fabs(dogXToFloor) < floorLength / 2.f + 64.f)
+				{
+					Vector2 closestFloorPos = Vector2Lerp(start, end, dogXToFloor / floorLength + 0.5f);
+					float dist = Vector2DotProduct(Vector2Subtract(pos, closestFloorPos), dogUp);
+					if (dist > 80.f && dist < 120.f && dist < minFloorDist)
+					{
+						minFloorDist = dist;
+						minPos = Vector2Add(closestFloorPos, Vector2Scale(dogUp, 100.f));
+					}
+				}
+			}
 
+			// Normal floors
 			for (int i = 0; i < game->floorsCount; i++)
 			{
-				// TODO take rotation into account oh god
 				Floor& floor = game->floors[i];
 				Vector2 floorCenter = Vector2Lerp(floor.start, floor.end, 0.5f);
 				float dogXToFloor = Vector2DotProduct(Vector2Subtract(pos, floorCenter), dogRight);
 				float floorLength = Vector2DotProduct(Vector2Subtract(floor.end, floor.start), dogRight);
-				if (fabs(dogXToFloor) < floorLength / 2.f + dogHitBox.width / 2.f)
+				if (fabs(dogXToFloor) < floorLength / 2.f + 64.f)
 				{
 					Vector2 closestFloorPos = Vector2Lerp(floor.start, floor.end, dogXToFloor / floorLength + 0.5f);
 					float dist = Vector2DotProduct(Vector2Subtract(pos, closestFloorPos), dogUp);
@@ -176,11 +208,6 @@ int main()
 		dogOutline.Update(dt, DOG_WOBBLE_RATE);
 
 		rectTest.Update(dt, WALL_WOBBLE_RATE);
-
-		for (int i = 0; i < game->floorsCount; i++)
-		{
-			game->floors[i].Update(dt, WALL_WOBBLE_RATE);
-		}
 		
 		BeginDrawing();
 		{
@@ -193,14 +220,18 @@ int main()
 			{
 				Floor& floor = game->floors[i];
 				floor.Draw(texLine, texPaintBlue);
-				//DrawRectangleLines((int)floor.start.x, (int)floor.start.y - 48.f, floor.end.x - floor.start.x, 64.f, BLUE);
 			}
+			for (int i = 0; i < game->elevatorsCount; i++)
+			{
+				Elevator& elevator = game->elevators[i];
+				elevator.Draw(texLine, texPaintLightGreen);
+			}
+
 			rectTest.Draw(texLine, texPaintGray, { 750.f, 260.f }, { 850.f, 540.f });
 
 			Vector2 drawPos = { pos.x, pos.y + hopOffset };
 			dogBack.Draw(texDogBack[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, false);
 			dogOutline.Draw(texDogOutline[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, true);
-
 			//DrawRectangleLines((int)dogHitBox.x, (int)dogHitBox.y, (int)dogHitBox.width, (int)dogHitBox.height, RED);
 
 			EndMode2D();
