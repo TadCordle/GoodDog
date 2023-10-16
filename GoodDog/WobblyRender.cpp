@@ -86,7 +86,7 @@ void DrawPaintLine(Texture2D& paintTex, Vector2 start, Vector2 end)
 	else
 	{
 		Vector2 s = start;
-		int numSegments = (int)(totalLength / 96) + 1;
+		int numSegments = (int)(totalLength / 256) + 1;
 		for (int i = 0; i < numSegments; i++)
 		{
 			Vector2 e = (i == numSegments - 1) ? end : Vector2Lerp(start, end, 256 * (i + 1) / totalLength);

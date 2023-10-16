@@ -78,6 +78,8 @@ struct Game
 	int dangerBlocksCount = 0;
 	int curvesCount = 0;
 
+	Camera2D camera;
+
 	Game() {}
 	void AddFloor(Vector2 start, Vector2 end);
 };

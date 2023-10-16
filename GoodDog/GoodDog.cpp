@@ -35,6 +35,11 @@ int main()
 	Game* game = new Game();
 	game->AddFloor({ 0.f, 552.f }, { 1280.f, 552.f });
 
+	game->camera.offset = { 0.f, 0.f };
+	game->camera.rotation = 0.f;
+	game->camera.zoom = 1.f;
+	game->camera.target = { 0.f, 0.f };
+
 	WobblyTexture dogOutline, dogBack;
 	WobblyRectangle rectTest;
 
@@ -127,22 +132,26 @@ int main()
 		}
 		
 		BeginDrawing();
-
-		ClearBackground(DARKPURPLE);
-		DrawTexture(texBG, 0, 0, WHITE);
-
-		for (int i = 0; i < game->floorsCount; i++)
 		{
-			game->floors[i].Draw(texLine, texPaintBlue);
+			ClearBackground(DARKPURPLE);
+			DrawTexture(texBG, 0, 0, WHITE);
+
+			BeginMode2D(game->camera);
+
+			for (int i = 0; i < game->floorsCount; i++)
+			{
+				game->floors[i].Draw(texLine, texPaintBlue);
+			}
+			rectTest.Draw(texLine, texPaintGray, { 750.f, 260.f }, { 850.f, 540.f });
+
+			Vector2 drawPos = { pos.x, pos.y + hopOffset };
+			dogBack.Draw(texDogBack[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped, false);
+			dogOutline.Draw(texDogOutline[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped, true);
+
+			EndMode2D();
+
+			//DrawFPS(10, 10);
 		}
-		rectTest.Draw(texLine, texPaintGray, { 750.f, 260.f }, { 850.f, 540.f });
-		
-		Vector2 drawPos = { pos.x, pos.y + hopOffset };
-		dogBack.Draw(texDogBack[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped, false);
-		dogOutline.Draw(texDogOutline[frame], drawPos, {dogSpriteScale, dogSpriteScale}, dogSpriteAngle, dogFlipped, true);
-
-		//DrawFPS(10, 10);
-
 		EndDrawing();
 	}
 
