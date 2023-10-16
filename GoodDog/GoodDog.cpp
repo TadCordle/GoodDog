@@ -113,7 +113,7 @@ int main()
 				if (pos.x > 1280.f) dogFlipped = true;
 				if (pos.x < 0.f) dogFlipped = false;
 
-				pos.x += (dogFlipped ? -1.f : 1.f) * 280.f * dt;
+				pos = Vector2Add(pos, Vector2Scale(dogRight, (dogFlipped ? -1.f : 1.f) * 280.f * dt));
 
 				hopOffset += (frame == 2 ? -100.f : 100.f) * dt;
 				if (hopOffset > 0.f) hopOffset = 0.f;
@@ -130,13 +130,8 @@ int main()
 			// Check if we're standing on anything
 			float minFloorDist = FLT_MAX;
 			Vector2 minPos = {};
-
-			// Elevators
-			for (int i = 0; i < game->elevatorsCount; i++)
+			auto CheckOnFloor = [&](Vector2 start, Vector2 end)
 			{
-				Elevator& elevator = game->elevators[i];
-				Vector2 start = elevator.GetCurrentStart();
-				Vector2 end = elevator.GetCurrentEnd();
 				Vector2 floorCenter = Vector2Lerp(start, end, 0.5f);
 				float dogXToFloor = Vector2DotProduct(Vector2Subtract(pos, floorCenter), dogRight);
 				float floorLength = Vector2DotProduct(Vector2Subtract(end, start), dogRight);
@@ -144,34 +139,27 @@ int main()
 				{
 					Vector2 closestFloorPos = Vector2Lerp(start, end, dogXToFloor / floorLength + 0.5f);
 					float dist = Vector2DotProduct(Vector2Subtract(pos, closestFloorPos), dogUp);
-					if (dist > 80.f && dist < 120.f && dist < minFloorDist)
+					if (dist > 60.f && dist < 140.f && dist < minFloorDist)
 					{
 						minFloorDist = dist;
 						minPos = Vector2Add(closestFloorPos, Vector2Scale(dogUp, 100.f));
 					}
 				}
+			};
+
+			// Elevators
+			for (int i = 0; i < game->elevatorsCount; i++)
+			{
+				Elevator& elevator = game->elevators[i];
+				CheckOnFloor(elevator.GetCurrentStart(), elevator.GetCurrentEnd());
 			}
 
 			// Normal floors
 			for (int i = 0; i < game->floorsCount; i++)
 			{
 				Floor& floor = game->floors[i];
-				Vector2 floorCenter = Vector2Lerp(floor.start, floor.end, 0.5f);
-				float dogXToFloor = Vector2DotProduct(Vector2Subtract(pos, floorCenter), dogRight);
-				float floorLength = Vector2DotProduct(Vector2Subtract(floor.end, floor.start), dogRight);
-				if (fabs(dogXToFloor) < floorLength / 2.f + 64.f)
-				{
-					Vector2 closestFloorPos = Vector2Lerp(floor.start, floor.end, dogXToFloor / floorLength + 0.5f);
-					float dist = Vector2DotProduct(Vector2Subtract(pos, closestFloorPos), dogUp);
-					if (dist > 80.f && dist < 120.f && dist < minFloorDist)
-					{
-						minFloorDist = dist;
-						minPos = Vector2Add(closestFloorPos, Vector2Scale(dogUp, 100.f));
-					}
-				}
+				CheckOnFloor(floor.start, floor.end);
 			}
-
-			// TODO: Check if obstacle
 
 			if (minFloorDist == FLT_MAX || minFloorDist > 100.f)
 			{
