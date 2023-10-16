@@ -56,6 +56,8 @@ int main()
 		float dt = GetFrameTime();
 		if (dt > 0.03333333f) dt = 0.03333333f;
 
+		Rectangle dogHitBox = { pos.x - 64.f, pos.y - 32.f, 128.f, 96.f };
+
 		switch (state)
 		{
 		case CUTSCENE:
@@ -90,19 +92,55 @@ int main()
 		{
 			UpdateMusicStream(music);
 
-			if (pos.x > 1280.f) dogFlipped = true;
-			if (pos.x < 0.f) dogFlipped = false;
+			// Dog hopping
+			{
+				if (pos.x > 1280.f) dogFlipped = true;
+				if (pos.x < 0.f) dogFlipped = false;
 
-			pos.x += (dogFlipped ? -1.f : 1.f) * 280.f * dt;
+				pos.x += (dogFlipped ? -1.f : 1.f) * 280.f * dt;
 
-			hopOffset += (frame == 2 ? -100.f : 100.f) * dt;
-			if (hopOffset > 0.f) hopOffset = 0.f;
-			if (hopOffset < -20.f) hopOffset = -20.f;
+				hopOffset += (frame == 2 ? -100.f : 100.f) * dt;
+				if (hopOffset > 0.f) hopOffset = 0.f;
+				if (hopOffset < -20.f) hopOffset = -20.f;
 
-			hopTimer += dt;
-			double timeWithinBeat = remainder(hopTimer, HOP_TIMER);
-			frame = timeWithinBeat >= 0.0 ? 1 : 2;
-			// TODO: Use GetMusicTimePlayed(music) to ensure we're synced up, in case someone drags the window and pauses the game or something
+				hopTimer += dt;
+				double timeWithinBeat = remainder(hopTimer, HOP_TIMER);
+				frame = timeWithinBeat >= 0.0 ? 1 : 2;
+				// TODO: Use GetMusicTimePlayed(music) to ensure we're synced up, in case someone drags the window and pauses the game or something
+			}
+
+			// TODO: Check if walking over curve; initiate rotation if so
+
+			bool aboveFloor = false;
+
+			// TODO: Check if "above" elevator, if so match height
+
+			for (int i = 0; i < game->floorsCount; i++)
+			{
+				// TODO take rotation into account oh god
+				Floor& floor = game->floors[i];
+				if (dogHitBox.x + dogHitBox.width > floor.start.x &&
+					dogHitBox.x < floor.end.x &&
+					dogHitBox.y + dogHitBox.height > floor.start.y - 48.f &&
+					dogHitBox.y < floor.start.y + 16.f)
+				{
+					pos.y = floor.start.y - 96.f;
+					aboveFloor = true;
+				}
+			}
+
+			// TODO: Check if obstacle
+
+			if (!aboveFloor)
+			{
+				// TODO: Fall
+			}
+
+			// TODO: Check collision with obstacle
+
+			// TODO: Check collision with reverser
+
+			// TODO: (?) Check collision with camera zone to change camera parameters?
 
 			break;
 		}
@@ -140,13 +178,17 @@ int main()
 
 			for (int i = 0; i < game->floorsCount; i++)
 			{
-				game->floors[i].Draw(texLine, texPaintBlue);
+				Floor& floor = game->floors[i];
+				floor.Draw(texLine, texPaintBlue);
+				//DrawRectangleLines((int)floor.start.x, (int)floor.start.y - 48.f, floor.end.x - floor.start.x, 64.f, BLUE);
 			}
 			rectTest.Draw(texLine, texPaintGray, { 750.f, 260.f }, { 850.f, 540.f });
 
 			Vector2 drawPos = { pos.x, pos.y + hopOffset };
 			dogBack.Draw(texDogBack[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped, false);
 			dogOutline.Draw(texDogOutline[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped, true);
+
+			//DrawRectangleLines((int)dogHitBox.x, (int)dogHitBox.y, (int)dogHitBox.width, (int)dogHitBox.height, RED);
 
 			EndMode2D();
 
