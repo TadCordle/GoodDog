@@ -132,6 +132,7 @@ int main()
 					float dist = Vector2DotProduct(Vector2Subtract(pos, closestFloorPos), dogUp);
 					if (dist > 80.f && dist < 120.f && dist < minFloorDist)
 					{
+						printf("%f\n", dist);
 						minFloorDist = dist;
 						minPos = Vector2Add(closestFloorPos, Vector2Scale(dogUp, 100.f));
 					}
