@@ -37,9 +37,9 @@ int main()
 	GameState state = CUTSCENE;
 
 	Game* game = new Game();
-	game->AddFloor({ 0.f, 300.f }, { 1280.f, 552.f });
-	game->AddFloor({ 0.f, 552.f }, { 1280.f, 300.f });
-	game->AddElevator({ 200.f, 300.f }, { 600.f, 300.f }, { 200.f, 300.f }, { 600.f, 600.f }, 0.9f, Button::W);
+	game->AddFloor({ 0.f, 552.f }, { 1280.f, 552.f });
+	game->AddFloor({ 1000.f, 300.f }, { 1280.f, 300.f });
+	game->AddElevator({ 500.f, 300.f }, { 1000.f, 300.f }, { 500.f, 552.f }, { 1000.f, 300.f }, 0.7f, Button::W);
 
 	game->camera.offset = { 0.f, 0.f };
 	game->camera.rotation = 0.f;
@@ -56,6 +56,7 @@ int main()
 	double hopTimer = -HOP_TIMER / 2.f;
 	int frame = 0;
 	float hopOffset = 0.f;
+	float fallingSpeed = 0.f;
 
 	while (!WindowShouldClose())
 	{
@@ -78,15 +79,15 @@ int main()
 		case CUTSCENE:
 		{
 			cutsceneTimer += dt;
-			if (cutsceneTimer < 1.f)
+			if (cutsceneTimer < 0.5f)
 			{
 				//printf("Waiting\n");
 			}
-			else if (cutsceneTimer < 1.5f)
+			else if (cutsceneTimer < 1.f)
 			{
 				//printf("Pre-throw\n");
 			}
-			else if (cutsceneTimer < 1.6f)
+			else if (cutsceneTimer < 1.5f)
 			{
 				//printf("Throw\n");
 				dogFlipped = false;
@@ -172,13 +173,16 @@ int main()
 
 			// TODO: Check if obstacle
 
-			if (minFloorDist == FLT_MAX)
+			if (minFloorDist == FLT_MAX || minFloorDist > 100.f)
 			{
-				// TODO: Fall
+				// Fall
+				fallingSpeed += 9.f;
+				pos = Vector2Add(pos, Vector2Scale(dogUp, -fallingSpeed * dt));
 			}
 			else
 			{
 				pos = minPos;
+				fallingSpeed = 0.f;
 			}
 
 			// TODO: Check collision with obstacle
