@@ -12,13 +12,6 @@ float hash_float(int seed)
 	return (float)pcg_hash(seed) / (float)UINT32_MAX * 2.f;
 }
 
-WobblyTexture::WobblyTexture(const char* _path)
-{
-	texture = LoadTexture(_path);
-	wobbleTime = 0.f;
-	wobbleState = 0;
-}
-
 void WobblyTexture::Update(float dt, float wobbleRate)
 {
 	wobbleTime -= dt;
@@ -29,7 +22,7 @@ void WobblyTexture::Update(float dt, float wobbleRate)
 	}
 }
 
-void WobblyTexture::Draw(Vector2 pos, Vector2 scale, float angle, bool hFlipped, bool stableWobble)
+void WobblyTexture::Draw(Texture2D& texture, Vector2 pos, Vector2 scale, float angle, bool hFlipped, bool stableWobble)
 {
 	float randOffX = hash_float(wobbleState) * 10.f - 5.f;
 	float randOffY = hash_float(wobbleState) * 10.f - 5.f;
@@ -42,11 +35,6 @@ void WobblyTexture::Draw(Vector2 pos, Vector2 scale, float angle, bool hFlipped,
 	Rectangle dstRect = { pos.x + randOffX * scale.x, pos.y + randOffY * scale.y, frameSize.x, frameSize.y };
 	Vector2 origin = { frameSize.x / 2.f, frameSize.y / 2.f };
 	DrawTexturePro(texture, srcRect, dstRect, origin, angle + randAngle, WHITE);
-}
-
-void WobblyTexture::Unload()
-{
-	UnloadTexture(texture);
 }
 
 WobblyLine::WobblyLine()

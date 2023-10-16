@@ -8,14 +8,11 @@
 
 struct WobblyTexture
 {
-	Texture2D texture;
-	float wobbleTime;
-	int wobbleState;
+	float wobbleTime = 0.f;
+	int wobbleState = 0;
 
-	WobblyTexture(const char* _path);
 	void Update(float dt, float wobbleRate);
-	void Draw(Vector2 pos, Vector2 scale, float angle, bool hFlipped = false, bool stableWobble = false);
-	void Unload();
+	void Draw(Texture2D& texture, Vector2 pos, Vector2 scale, float angle, bool hFlipped = false, bool stableWobble = false);
 };
 
 struct WobblyLine

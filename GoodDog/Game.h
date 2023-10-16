@@ -66,9 +66,6 @@ enum GameState
 
 struct Game
 {
-	Texture2D texLine;
-	Texture2D texPaint;
-
 	Floor floors[256] = {};
 	Curve curves[256] = {};
 	DangerBlock dangerBlocks[256] = {};
@@ -82,6 +79,5 @@ struct Game
 	int curvesCount = 0;
 
 	Game() {}
-	Game(Texture2D& _texLine, Texture2D& _texPaint) { texLine = _texLine; texPaint = _texPaint; }
 	void AddFloor(Vector2 start, Vector2 end);
 };

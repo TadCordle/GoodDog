@@ -15,15 +15,15 @@ int main()
 	float dogSpriteAngle = 0.f;
 	bool dogFlipped = true;
 
-	WobblyTexture texDogOutline[] = {
-		WobblyTexture("resources/dog_outline.png"),
-		WobblyTexture("resources/dog_hop1_outline.png"),
-		WobblyTexture("resources/dog_hop2_outline.png"),
+	Texture2D texDogOutline[] = {
+		LoadTexture("resources/dog_outline.png"),
+		LoadTexture("resources/dog_hop1_outline.png"),
+		LoadTexture("resources/dog_hop2_outline.png"),
 	};
-	WobblyTexture texDogBack[] = { 
-		WobblyTexture("resources/dog_back.png"),
-		WobblyTexture("resources/dog_hop1_back.png"),
-		WobblyTexture("resources/dog_hop2_back.png"),
+	Texture2D texDogBack[] = { 
+		LoadTexture("resources/dog_back.png"),
+		LoadTexture("resources/dog_hop1_back.png"),
+		LoadTexture("resources/dog_hop2_back.png"),
 	};
 	Texture2D texLine = LoadTexture("resources/line.png");
 	Texture2D texPaintBlue = LoadTexture("resources/paint_blue.png");
@@ -32,9 +32,10 @@ int main()
 
 	GameState state = CUTSCENE;
 
-	Game* game = new Game(texLine, texPaintBlue);
+	Game* game = new Game();
 	game->AddFloor({ 0.f, 552.f }, { 1280.f, 552.f });
 
+	WobblyTexture dogOutline, dogBack;
 	WobblyRectangle rectTest;
 
 	// Cutscene state
@@ -115,8 +116,8 @@ int main()
 		}
 		}
 
-		texDogBack[frame].Update(dt, DOG_WOBBLE_RATE);
-		texDogOutline[frame].Update(dt, DOG_WOBBLE_RATE);
+		dogBack.Update(dt, DOG_WOBBLE_RATE);
+		dogOutline.Update(dt, DOG_WOBBLE_RATE);
 
 		rectTest.Update(dt, WALL_WOBBLE_RATE);
 
@@ -137,8 +138,8 @@ int main()
 		rectTest.Draw(texLine, texPaintGray, { 750.f, 260.f }, { 850.f, 540.f });
 		
 		Vector2 drawPos = { pos.x, pos.y + hopOffset };
-		texDogBack[frame].Draw(drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped, false);
-		texDogOutline[frame].Draw(drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped, true);
+		dogBack.Draw(texDogBack[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogSpriteAngle, dogFlipped, false);
+		dogOutline.Draw(texDogOutline[frame], drawPos, {dogSpriteScale, dogSpriteScale}, dogSpriteAngle, dogFlipped, true);
 
 		//DrawFPS(10, 10);
 
@@ -147,8 +148,8 @@ int main()
 
 	for (int i = 0; i < 3; i++)
 	{
-		texDogOutline[i].Unload();
-		texDogBack[i].Unload();
+		UnloadTexture(texDogBack[i]);
+		UnloadTexture(texDogOutline[i]);
 	}
 	UnloadTexture(texLine);
 	UnloadTexture(texPaintBlue);
