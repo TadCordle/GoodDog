@@ -39,7 +39,7 @@ int main()
 	Game* game = new Game();
 	game->AddFloor({ 0.f, 552.f }, { 1280.f, 552.f });
 	game->AddFloor({ 1000.f, 300.f }, { 1280.f, 300.f });
-	game->AddElevator({ 500.f, 300.f }, { 1000.f, 300.f }, { 500.f, 552.f }, { 1000.f, 300.f }, 0.7f, Button::W);
+	game->AddElevator({ 500.f, 300.f }, { 1000.f, 300.f }, { 500.f, 552.f }, { 1000.f, 552.f }, 0.3f, Button::W);
 
 	game->camera.offset = { 0.f, 0.f };
 	game->camera.rotation = 0.f;
@@ -47,8 +47,7 @@ int main()
 	game->camera.target = { 0.f, 0.f };
 
 	WobblyTexture dogOutline, dogBack;
-	WobblyRectangle rectTest;
-
+	
 	// Cutscene state
 	float cutsceneTimer = 0.f;
 
@@ -198,8 +197,6 @@ int main()
 
 		dogBack.Update(dt, DOG_WOBBLE_RATE);
 		dogOutline.Update(dt, DOG_WOBBLE_RATE);
-
-		rectTest.Update(dt, WALL_WOBBLE_RATE);
 		
 		BeginDrawing();
 		{
@@ -218,8 +215,6 @@ int main()
 				Elevator& elevator = game->elevators[i];
 				elevator.Draw(texLine, texPaintLightGreen);
 			}
-
-			rectTest.Draw(texLine, texPaintGray, { 750.f, 260.f }, { 850.f, 540.f });
 
 			Vector2 drawPos = { pos.x, pos.y + hopOffset };
 			dogBack.Draw(texDogBack[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, false);

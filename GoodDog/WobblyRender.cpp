@@ -92,7 +92,7 @@ void DrawPaintLine(Texture2D& paintTex, Vector2 start, Vector2 end)
 			Vector2 e = (i == numSegments - 1) ? end : Vector2Lerp(start, end, 256 * (i + 1) / totalLength);
 			if (i == numSegments - 1)
 				s = Vector2Lerp(start, end, 1.f - (256.f / totalLength));
-			Rectangle srcRect = { 0.f, hash_float((int)s.x + i) * 232.f, 256.f, 24.f };
+			Rectangle srcRect = { 0.f, hash_float(i) * 232.f, 256.f, 24.f };
 			Rectangle dstRect = { (s.x + e.x) / 2.f, (s.y + e.y) / 2.f, 256.f, 24.f};
 			Vector2 origin = { 128.f, 12.f };
 			float angle = atan2f(e.y - s.y, e.x - s.x) * RAD2DEG;
