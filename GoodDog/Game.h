@@ -88,20 +88,42 @@ struct DangerBlock
 	inline Vector2 GetCurrentPos() { float t = currentTravelTime / 0.4f; return Vector2Lerp(pos1, pos2, t); }
 };
 
+enum Direction
+{
+	Left,
+	Right,
+	Up,
+	Down
+};
+
 struct Reverser
 {
-	Rectangle dimensions;
-	Vector2 pos;
-	Vector2 pos1;
-	Vector2 pos2;
+	Vector2 pos1 = {};
+	Vector2 pos2 = {};
+	Direction dir;
 	Button button;
-	float enabled;
+	float enabled = 1.f;
+	float currentTravelTime = 0.f;
+	WobblyTexture texFront, texBack;
+
+	Reverser() {}
+	Reverser(Vector2 _pos1, Vector2 _pos2, Direction _dir, Button _button);
+	void Update(float dt, float wobbleRate);
+	void Draw(Texture2D& texBackEnabled, Texture2D& texBackDisabled, Texture2D& texOutline, Texture2D& texArrows);
+
+	inline Vector2 GetCurrentPos() { float t = currentTravelTime / 0.4f; return Vector2Lerp(pos1, pos2, t); }
 };
 
 struct Curve
 {
-	Vector2 pos;
+	Vector2 pos = {};
 	CurveType type;
+	WobblyTexture texOutline;
+
+	Curve() {}
+	Curve(Vector2 _pos, CurveType _type);
+	void Update(float dt, float wobbleRate);
+	void Draw(Texture2D& lineTex, Texture2D& paintTex);
 };
 
 enum GameState
@@ -130,6 +152,8 @@ struct Game
 
 	Game() {}
 	void AddFloor(Vector2 start, Vector2 end);
+	void AddCurve(Vector2 pos, CurveType type);
 	void AddElevator(Vector2 start, Vector2 end, Vector2 newStart, Vector2 newEnd, float travelTime, Button button);
 	void AddDangerBlock(Vector2 pos1, Vector2 pos2, Vector2 size, Button button);
+	void AddReverser(Vector2 pos1, Vector2 pos2, Direction dir, Button button);
 };

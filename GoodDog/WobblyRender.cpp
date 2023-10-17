@@ -22,19 +22,20 @@ void WobblyTexture::Update(float dt, float wobbleRate)
 	}
 }
 
-void WobblyTexture::Draw(Texture2D& texture, Vector2 pos, Vector2 scale, float angle, bool hFlipped, bool stableWobble)
+void WobblyTexture::Draw(Texture2D& texture, Vector2 pos, Vector2 scale, float angle, bool hFlipped, bool stableWobble, float alpha)
 {
 	float randOffX = hash_float(wobbleState) * 10.f - 5.f;
-	float randOffY = hash_float(wobbleState) * 10.f - 5.f;
-	float randScaleX = stableWobble ? 1.f : (hash_float(wobbleState) * 0.1f + 0.95f);
-	float randScaleY = stableWobble ? 1.f : (hash_float(wobbleState) * 0.1f + 0.95f);
-	float randAngle = stableWobble ? 0.f : (hash_float(wobbleState) * 2.f - 1.f);
+	float randOffY = hash_float(wobbleState + 1) * 10.f - 5.f;
+	float randScaleX = stableWobble ? 1.f : (hash_float(wobbleState + 2) * 0.1f + 0.95f);
+	float randScaleY = stableWobble ? 1.f : (hash_float(wobbleState + 3) * 0.1f + 0.95f);
+	float randAngle = stableWobble ? 0.f : (hash_float(wobbleState + 4) * 2.f - 1.f);
 
 	Vector2 frameSize = { texture.width * randScaleX * scale.x, texture.height * randScaleY * scale.y };
 	Rectangle srcRect = { 0.f, 0.f, (hFlipped ? -1.f : 1.f) * (float)texture.width, (float)texture.height };
 	Rectangle dstRect = { pos.x + randOffX * scale.x, pos.y + randOffY * scale.y, frameSize.x, frameSize.y };
 	Vector2 origin = { frameSize.x / 2.f, frameSize.y / 2.f };
-	DrawTexturePro(texture, srcRect, dstRect, origin, angle + randAngle, WHITE);
+	Color color = { 255, 255, 255, (unsigned char)(alpha * 255) };
+	DrawTexturePro(texture, srcRect, dstRect, origin, angle + randAngle, color);
 }
 
 WobblyLine::WobblyLine()

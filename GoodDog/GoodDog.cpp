@@ -32,6 +32,10 @@ int main()
 	Texture2D texPaintGray = LoadTexture("resources/paint_gray.png");
 	Texture2D texPaintLightGreen = LoadTexture("resources/paint_lightgreen.png");
 	Texture2D texPaintLightBlue = LoadTexture("resources/paint_lightblue.png");
+	Texture2D texReverserBackEnabled = LoadTexture("resources/reverser_enabled.png");
+	Texture2D texReverserBackDisabled = LoadTexture("resources/reverser_disabled.png");
+	Texture2D texReverserOutline = LoadTexture("resources/reverser_outline.png");
+	Texture2D texReverserArrows = LoadTexture("resources/reverser_arrows.png");
 	Texture2D texBG = LoadTexture("resources/bg.png");
 
 	GameState state = CUTSCENE;
@@ -40,7 +44,9 @@ int main()
 	game->AddFloor({ 0.f, 552.f }, { 1280.f, 552.f });
 	game->AddFloor({ 1000.f, 300.f }, { 1280.f, 300.f });
 	game->AddElevator({ 500.f, 300.f }, { 1000.f, 300.f }, { 500.f, 552.f }, { 1000.f, 552.f }, 0.3f, Button::W);
-	game->AddDangerBlock({ 1030.f, 426.f }, { 1030.f, 426.f }, { 60.f, 220.f }, Button::A);
+	game->AddReverser({ 30.f, 426.f }, { 30.f, 426.f }, Right, Button::A);
+	game->AddReverser({ 1030.f, 426.f }, { 1030.f, 426.f }, Left, Button::A);
+	//game->AddDangerBlock({ 1030.f, 426.f }, { 1030.f, 426.f }, { 60.f, 220.f }, Button::A);
 
 	game->camera.offset = { 0.f, 0.f };
 	game->camera.rotation = 0.f;
@@ -63,20 +69,16 @@ int main()
 		float dt = GetFrameTime();
 		if (dt > 0.03333333f) dt = 0.03333333f;
 
-		Rectangle dogHitBox = { pos.x - 48.f, pos.y - 48.f, 96.f, 96.f };
-
-		for (int i = 0; i < game->floorsCount; i++)
-		{
-			game->floors[i].Update(dt, WALL_WOBBLE_RATE);
-		}
-		for (int i = 0; i < game->elevatorsCount; i++)
-		{
-			game->elevators[i].Update(dt, WALL_WOBBLE_RATE);
-		}
 		for (int i = 0; i < game->dangerBlocksCount; i++)
-		{
 			game->dangerBlocks[i].Update(dt, WALL_WOBBLE_RATE);
-		}
+		for (int i = 0; i < game->floorsCount; i++)
+			game->floors[i].Update(dt, WALL_WOBBLE_RATE);
+		for (int i = 0; i < game->elevatorsCount; i++)
+			game->elevators[i].Update(dt, WALL_WOBBLE_RATE);
+		for (int i = 0; i < game->reversersCount; i++)
+			game->reversers[i].Update(dt, WALL_WOBBLE_RATE);
+
+		Rectangle dogHitBox = { pos.x - 48.f, pos.y - 48.f, 96.f, 96.f };
 
 		switch (state)
 		{
@@ -129,7 +131,7 @@ int main()
 				// TODO: Use GetMusicTimePlayed(music) to ensure we're synced up, in case someone drags the window and pauses the game or something
 			}
 
-			// TODO: (?) Check collision with camera zone to change camera parameters?
+			// TODO: Check collision with camera zone to change camera parameters
 
 			// TODO: Check if walking over curve; initiate rotation if so
 
@@ -179,16 +181,41 @@ int main()
 				fallingSpeed = 0.f;
 			}
 
-			// TODO: Check collision with reverser
+			float dogTop = dogHitBox.y;
+			float dogBot = dogHitBox.y + dogHitBox.height;
+			float dogLeft = dogHitBox.x;
+			float dogRight = dogHitBox.x + dogHitBox.width;
+
+			// Check collision with reverser
+			for (int i = 0; i < game->reversersCount; i++)
+			{
+				Reverser& block = game->reversers[i];
+				Vector2 blockPos = block.GetCurrentPos();
+				float blockTop = blockPos.y - 110;
+				float blockBot = blockPos.y + 110;
+				float blockLeft = blockPos.x - 30;
+				float blockRight = blockPos.x + 30;
+
+				if (dogTop < blockBot && dogBot > blockTop && dogLeft < blockRight && dogRight > blockLeft)
+				{
+					if (block.enabled == 1.f)
+					{
+						dogFlipped = !dogFlipped;
+						block.enabled -= dt;
+						// TODO: play reverse sound
+					}
+					else if (block.enabled == 0.f)
+					{
+						state = LOSE;
+						// TODO: play sad sound
+					}
+					break;
+				}
+			}
 
 			// Check collision with obstacle
 			for (int i = 0; i < game->dangerBlocksCount; i++)
 			{
-				float dogTop = dogHitBox.y - dogHitBox.height / 2.f;
-				float dogBot = dogHitBox.y + dogHitBox.height / 2.f;
-				float dogLeft = dogHitBox.x - dogHitBox.width / 2.f;
-				float dogRight = dogHitBox.x + dogHitBox.width / 2.f;
-
 				DangerBlock& block = game->dangerBlocks[i];
 				Vector2 blockPos = block.GetCurrentPos();
 				float blockTop = blockPos.y - block.dimensions.y;
@@ -214,7 +241,7 @@ int main()
 		}
 		case LOSE:
 		{
-			StopMusicStream(music);
+			StopMusicStream(music); // TODO: Fade music out to avoid pop
 			frame = 2;
 			// TODO: Make dog fall off screen
 			break;
@@ -231,26 +258,19 @@ int main()
 
 			BeginMode2D(game->camera);
 
-			for (int i = 0; i < game->floorsCount; i++)
-			{
-				Floor& floor = game->floors[i];
-				floor.Draw(texLine, texPaintBlue);
-			}
-			for (int i = 0; i < game->elevatorsCount; i++)
-			{
-				Elevator& elevator = game->elevators[i];
-				elevator.Draw(texLine, texPaintLightGreen);
-			}
 			for (int i = 0; i < game->dangerBlocksCount; i++)
-			{
-				DangerBlock& dangerBlock = game->dangerBlocks[i];
-				dangerBlock.Draw(texLine, texPaintGray);
-			}
+				game->dangerBlocks[i].Draw(texLine, texPaintGray);
+			for (int i = 0; i < game->floorsCount; i++)
+				game->floors[i].Draw(texLine, texPaintBlue);
+			for (int i = 0; i < game->elevatorsCount; i++)
+				game->elevators[i].Draw(texLine, texPaintLightGreen);
+			for (int i = 0; i < game->reversersCount; i++)
+				game->reversers[i].Draw(texReverserBackEnabled, texReverserBackDisabled, texReverserOutline, texReverserArrows);
 
 			Vector2 drawPos = Vector2Add({ pos.x, pos.y + hopOffset}, Vector2Scale(dogRight, dogFlipped ? -12.f : 12.f));
 			dogBack.Draw(texDogBack[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, false);
 			dogOutline.Draw(texDogOutline[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, true);
-			DrawRectangleLines((int)dogHitBox.x, (int)dogHitBox.y, (int)dogHitBox.width, (int)dogHitBox.height, RED);
+			//DrawRectangleLines((int)dogHitBox.x, (int)dogHitBox.y, (int)dogHitBox.width, (int)dogHitBox.height, RED);
 
 			EndMode2D();
 
