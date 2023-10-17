@@ -13,7 +13,6 @@ struct WobblyTexture
 
 	void Update(float dt, float wobbleRate);
 	void Draw(Texture2D& texture, Vector2 pos, Vector2 scale, float angle, bool hFlipped = false, bool stableWobble = false, float alpha = 1.f);
-	void DrawRegion(Texture2D& texture, Rectangle srcRect, Vector2 pos, Vector2 size);
 };
 
 struct WobblyLine

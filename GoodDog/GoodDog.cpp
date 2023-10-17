@@ -10,7 +10,7 @@ int main()
 
 	Music music = LoadMusicStream("resources/music.wav");
 
-	Vector2 pos = { 300.f, 450.f };
+	Vector2 pos = { 300.f, 550.f };
 	float dogSpriteScale = 0.75f;
 	float dogAngle = 0.f;
 	bool dogFlipped = true;
@@ -43,16 +43,20 @@ int main()
 	GameState state = CUTSCENE;
 
 	Game* game = new Game();
-	game->AddFloor({ 0.f, 552.f }, { 1280.f, 552.f });
 	//game->AddFloor({ 1000.f, 300.f }, { 1280.f, 300.f });
 	//game->AddElevator({ 500.f, 300.f }, { 1000.f, 300.f }, { 500.f, 552.f }, { 1000.f, 552.f }, 0.3f, Button::W);
 	//game->AddReverser({ 30.f, 426.f }, { 30.f, 426.f }, Right, Button::A);
 	//game->AddReverser({ 1030.f, 426.f }, { 1030.f, 426.f }, Left, Button::A);
 	//game->AddDangerBlock({ 1030.f, 426.f }, { 1030.f, 426.f }, { 60.f, 220.f }, Button::A);
-	game->AddCurve({ 64.f, 64.f }, NW);
-	game->AddCurve({ 192.f, 64.f }, NE);
-	game->AddCurve({ 64.f, 192.f }, SW);
-	game->AddCurve({ 192.f, 192.f }, SE);
+
+	game->AddFloor({ 18.f, 540.f }, { 18.f, 252.f });
+	game->AddCurve({ 64.f, 604.f }, SW);
+	game->AddFloor({ 128.f, 652.f }, { 1152.f, 652.f });
+	game->AddCurve({ 1216.f, 604.f }, SE);
+	game->AddFloor({ 1260.f, 540.f }, { 1260.f, 252.f });
+	game->AddCurve({ 1216.f, 192.f }, NE);
+	game->AddFloor({ 128.f, 144.f }, { 1152.f, 144.f });
+	game->AddCurve({ 64.f, 192.f }, NW);
 
 	game->camera.offset = { 0.f, 0.f };
 	game->camera.rotation = 0.f;
@@ -77,8 +81,6 @@ int main()
 
 		for (int i = 0; i < game->dangerBlocksCount; i++)
 			game->dangerBlocks[i].Update(dt, WALL_WOBBLE_RATE);
-		for (int i = 0; i < game->curvesCount; i++)
-			game->curves[i].Update(dt, WALL_WOBBLE_RATE);
 		for (int i = 0; i < game->floorsCount; i++)
 			game->floors[i].Update(dt, WALL_WOBBLE_RATE);
 		for (int i = 0; i < game->elevatorsCount; i++)

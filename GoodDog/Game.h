@@ -122,7 +122,6 @@ struct Curve
 
 	Curve() {}
 	Curve(Vector2 _pos, CurveType _type);
-	void Update(float dt, float wobbleRate);
 	void Draw(Texture2D& lineTex, Texture2D& paintTex);
 };
 

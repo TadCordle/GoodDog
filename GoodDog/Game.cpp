@@ -42,8 +42,11 @@ void Floor::Update(float dt, float wobbleRate)
 void Floor::Draw(Texture2D& lineTex, Texture2D& paintTex)
 {
 	DrawPaintLine(paintTex, { start.x, start.y }, { end.x, end.y });
-	line1.Draw(lineTex, { start.x, start.y - 12.f }, { end.x, end.y - 12.f });
-	line2.Draw(lineTex, { start.x, start.y + 12.f }, { end.x, end.y + 12.f });
+	Vector2 offsetDir = Vector2Normalize({ end.y - start.y, end.x - start.x });
+	Vector2 offsetPos = Vector2Scale(offsetDir, 12.f);
+	Vector2 offsetNeg = Vector2Scale(offsetDir, -12.f);
+	line1.Draw(lineTex, { start.x + offsetNeg.x, start.y + offsetNeg.y }, { end.x + offsetNeg.x, end.y + offsetNeg.y });
+	line2.Draw(lineTex, { start.x + offsetPos.x, start.y + offsetPos.y }, { end.x + offsetPos.x, end.y + offsetPos.y });
 }
 
 Elevator::Elevator(Vector2 _start, Vector2 _end, Vector2 _newStart, Vector2 _newEnd, float _travelTime, Button _button)
@@ -153,12 +156,6 @@ Curve::Curve(Vector2 _pos, CurveType _type)
 {
 	pos = _pos;
 	type = _type;
-	texOutline = WobblyTexture();
-}
-
-void Curve::Update(float dt, float wobbleRate)
-{
-	texOutline.Update(dt, wobbleRate);
 }
 
 void Curve::Draw(Texture2D& lineTex, Texture2D& paintTex)
@@ -173,6 +170,7 @@ void Curve::Draw(Texture2D& lineTex, Texture2D& paintTex)
 	}
 
 	Rectangle dstRect = { pos.x, pos.y, 128.f, 128.f };
-	DrawTexturePro(paintTex, srcRect, dstRect, { 64.f, 64.f }, 0.f, WHITE);
-	texOutline.DrawRegion(lineTex, srcRect, pos, { 128.f, 128.f });
+	Vector2 origin = { 64.f, 64.f };
+	DrawTexturePro(paintTex, srcRect, dstRect, origin, 0.f, WHITE);
+	DrawTexturePro(lineTex, srcRect, dstRect, origin, 0.f, WHITE);
 }
