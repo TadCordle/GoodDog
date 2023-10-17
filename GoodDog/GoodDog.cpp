@@ -44,9 +44,9 @@ int main()
 	game->AddFloor({ 0.f, 552.f }, { 1280.f, 552.f });
 	game->AddFloor({ 1000.f, 300.f }, { 1280.f, 300.f });
 	game->AddElevator({ 500.f, 300.f }, { 1000.f, 300.f }, { 500.f, 552.f }, { 1000.f, 552.f }, 0.3f, Button::W);
-	//game->AddReverser({ 30.f, 426.f }, { 30.f, 426.f }, Right, Button::A);
-	//game->AddReverser({ 1030.f, 426.f }, { 1030.f, 426.f }, Left, Button::A);
-	game->AddDangerBlock({ 1030.f, 426.f }, { 1030.f, 426.f }, { 60.f, 220.f }, Button::A);
+	game->AddReverser({ 30.f, 426.f }, { 30.f, 426.f }, Right, Button::A);
+	game->AddReverser({ 1030.f, 426.f }, { 1030.f, 426.f }, Left, Button::A);
+	//game->AddDangerBlock({ 1030.f, 426.f }, { 1030.f, 426.f }, { 60.f, 220.f }, Button::A);
 
 	game->camera.offset = { 0.f, 0.f };
 	game->camera.rotation = 0.f;
@@ -186,12 +186,12 @@ int main()
 			float dogBot = dogHitBox.y + dogHitBox.height;
 			float dogLeft = dogHitBox.x;
 			float dogRight = dogHitBox.x + dogHitBox.width;
-			auto CheckDogHit = [&](Vector2 pos, float width, float height)
+			auto CheckDogHit = [&](Vector2 _pos, float _width, float _height)
 			{
-				float blockTop = pos.y - height / 2.f;
-				float blockBot = pos.y + height / 2.f;
-				float blockLeft = pos.x - width / 2.f;
-				float blockRight = pos.x + width / 2.f;
+				float blockTop = _pos.y - _height / 2.f;
+				float blockBot = _pos.y + _height / 2.f;
+				float blockLeft = _pos.x - _width / 2.f;
+				float blockRight = _pos.x + _width / 2.f;
 				return dogTop < blockBot && dogBot > blockTop && dogLeft < blockRight && dogRight > blockLeft;
 			};
 
@@ -200,7 +200,7 @@ int main()
 			{
 				Reverser& block = game->reversers[i];
 				Vector2 blockPos = block.GetCurrentPos();
-				if (CheckDogHit(blockPos, 60, 220));
+				if (CheckDogHit(blockPos, 60, 220))
 				{
 					if (block.enabled == 1.f)
 					{
