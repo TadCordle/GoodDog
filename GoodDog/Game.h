@@ -8,7 +8,8 @@
 #define WALL_WOBBLE_RATE 0.75f
 #define HOP_TIMER 0.833333333333
 
-enum Button { 
+enum Button {
+	None = 0,
 	A = KEY_A,
 	B = KEY_B, 
 	C = KEY_C, 
@@ -72,10 +73,19 @@ struct Elevator
 
 struct DangerBlock
 {
-	Rectangle dimensions;
-	Vector2 pos1;
-	Vector2 pos2;
+	WobblyRectangle wobblyRectangle;
+	Vector2 pos1 = {};
+	Vector2 pos2 = {};
+	Vector2 dimensions = {};
+	float currentTravelTime = 0.f;
 	Button button;
+
+	DangerBlock() {}
+	DangerBlock(Vector2 _pos1, Vector2 _pos2, Vector2 _dimensions, Button _button);
+	void Update(float dt, float wobbleRate);
+	void Draw(Texture2D& lineTex, Texture2D& paintTex);
+
+	inline Vector2 GetCurrentPos() { float t = currentTravelTime / 0.4f; return Vector2Lerp(pos1, pos2, t); }
 };
 
 struct Reverser
@@ -121,4 +131,5 @@ struct Game
 	Game() {}
 	void AddFloor(Vector2 start, Vector2 end);
 	void AddElevator(Vector2 start, Vector2 end, Vector2 newStart, Vector2 newEnd, float travelTime, Button button);
+	void AddDangerBlock(Vector2 pos1, Vector2 pos2, Vector2 size, Button button);
 };

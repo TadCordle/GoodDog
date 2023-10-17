@@ -40,6 +40,7 @@ int main()
 	game->AddFloor({ 0.f, 552.f }, { 1280.f, 552.f });
 	game->AddFloor({ 1000.f, 300.f }, { 1280.f, 300.f });
 	game->AddElevator({ 500.f, 300.f }, { 1000.f, 300.f }, { 500.f, 552.f }, { 1000.f, 552.f }, 0.3f, Button::W);
+	game->AddDangerBlock({ 1030.f, 426.f }, { 1030.f, 426.f }, { 60.f, 220.f }, Button::A);
 
 	game->camera.offset = { 0.f, 0.f };
 	game->camera.rotation = 0.f;
@@ -62,7 +63,7 @@ int main()
 		float dt = GetFrameTime();
 		if (dt > 0.03333333f) dt = 0.03333333f;
 
-		Rectangle dogHitBox = { pos.x - 64.f, pos.y - 32.f, 128.f, 96.f };
+		Rectangle dogHitBox = { pos.x - 48.f, pos.y - 48.f, 96.f, 96.f };
 
 		for (int i = 0; i < game->floorsCount; i++)
 		{
@@ -71,6 +72,10 @@ int main()
 		for (int i = 0; i < game->elevatorsCount; i++)
 		{
 			game->elevators[i].Update(dt, WALL_WOBBLE_RATE);
+		}
+		for (int i = 0; i < game->dangerBlocksCount; i++)
+		{
+			game->dangerBlocks[i].Update(dt, WALL_WOBBLE_RATE);
 		}
 
 		switch (state)
@@ -124,6 +129,8 @@ int main()
 				// TODO: Use GetMusicTimePlayed(music) to ensure we're synced up, in case someone drags the window and pauses the game or something
 			}
 
+			// TODO: (?) Check collision with camera zone to change camera parameters?
+
 			// TODO: Check if walking over curve; initiate rotation if so
 
 			// Check if we're standing on anything
@@ -160,9 +167,9 @@ int main()
 				CheckOnFloor(floor.start, floor.end);
 			}
 
+			// Are we falling?
 			if (minFloorDist == FLT_MAX || minFloorDist > 100.f)
 			{
-				// Fall
 				fallingSpeed += 1000.f * dt;
 				pos = Vector2Add(pos, Vector2Scale(dogUp, -fallingSpeed * dt));
 			}
@@ -172,11 +179,30 @@ int main()
 				fallingSpeed = 0.f;
 			}
 
-			// TODO: Check collision with obstacle
-
 			// TODO: Check collision with reverser
 
-			// TODO: (?) Check collision with camera zone to change camera parameters?
+			// Check collision with obstacle
+			for (int i = 0; i < game->dangerBlocksCount; i++)
+			{
+				float dogTop = dogHitBox.y - dogHitBox.height / 2.f;
+				float dogBot = dogHitBox.y + dogHitBox.height / 2.f;
+				float dogLeft = dogHitBox.x - dogHitBox.width / 2.f;
+				float dogRight = dogHitBox.x + dogHitBox.width / 2.f;
+
+				DangerBlock& block = game->dangerBlocks[i];
+				Vector2 blockPos = block.GetCurrentPos();
+				float blockTop = blockPos.y - block.dimensions.y;
+				float blockBot = blockPos.y + block.dimensions.y;
+				float blockLeft = blockPos.x - block.dimensions.x;
+				float blockRight = blockPos.x + block.dimensions.x;
+
+				if (dogTop < blockBot && dogBot > blockTop && dogLeft < blockRight && dogRight > blockLeft)
+				{
+					state = LOSE;
+					// TODO: play sad sound
+					break;
+				}
+			}
 
 			break;
 		}
@@ -189,8 +215,8 @@ int main()
 		case LOSE:
 		{
 			StopMusicStream(music);
-
-			// TODO
+			frame = 2;
+			// TODO: Make dog fall off screen
 			break;
 		}
 		}
@@ -215,11 +241,16 @@ int main()
 				Elevator& elevator = game->elevators[i];
 				elevator.Draw(texLine, texPaintLightGreen);
 			}
+			for (int i = 0; i < game->dangerBlocksCount; i++)
+			{
+				DangerBlock& dangerBlock = game->dangerBlocks[i];
+				dangerBlock.Draw(texLine, texPaintGray);
+			}
 
-			Vector2 drawPos = { pos.x, pos.y + hopOffset };
+			Vector2 drawPos = Vector2Add({ pos.x, pos.y + hopOffset}, Vector2Scale(dogRight, dogFlipped ? -12.f : 12.f));
 			dogBack.Draw(texDogBack[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, false);
 			dogOutline.Draw(texDogOutline[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, true);
-			//DrawRectangleLines((int)dogHitBox.x, (int)dogHitBox.y, (int)dogHitBox.width, (int)dogHitBox.height, RED);
+			DrawRectangleLines((int)dogHitBox.x, (int)dogHitBox.y, (int)dogHitBox.width, (int)dogHitBox.height, RED);
 
 			EndMode2D();
 
