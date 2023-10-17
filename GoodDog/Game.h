@@ -47,8 +47,8 @@ enum CurveType {
 
 struct DogRotationTarget
 {
-	float targetAngle;
-	bool fast;
+	float targetAngle = 0.f;
+	float angularSpeed = 0.f;
 };
 
 struct Floor
@@ -134,6 +134,8 @@ struct Curve
 	Curve() {}
 	Curve(Vector2 _pos, CurveType _type);
 	void Draw(Texture2D& lineTex, Texture2D& paintTex);
+	bool HitCurve(Vector2 dogPos, Vector2 offset);
+	DogRotationTarget GetRotationTarget(Vector2 point, Vector2 up, Vector2 right);
 };
 
 enum GameState

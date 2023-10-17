@@ -10,7 +10,7 @@ int main()
 
 	Music music = LoadMusicStream("resources/music.wav");
 
-	Vector2 pos = { 300.f, 550.f };
+	Vector2 pos = { 600.f, 550.f };
 	float dogSpriteScale = 0.75f;
 	float dogAngle = 0.f;
 	bool dogFlipped = true;
@@ -57,6 +57,7 @@ int main()
 	game->AddCurve({ 64.f, 192.f }, NW);
 	game->AddFloor({ 18.f, 540.f }, { 18.f, 252.f });
 	game->AddCurve({ 64.f, 604.f }, SW);
+	game->AddReverser({ 350.f, 526.f }, { 30.f, 426.f }, Left, Button::A);
 
 	game->camera.offset = { 0.f, 0.f };
 	game->camera.rotation = 0.f;
@@ -73,6 +74,7 @@ int main()
 	int frame = 0;
 	float hopOffset = 0.f;
 	float fallingSpeed = 0.f;
+	DogRotationTarget currentRotTarget;
 
 	while (!WindowShouldClose())
 	{
@@ -89,9 +91,6 @@ int main()
 			game->reversers[i].Update(dt, WALL_WOBBLE_RATE);
 
 		Rectangle dogHitBox = { pos.x - 48.f, pos.y - 48.f, 96.f, 96.f };
-
-		dogUp = { sinf(dogAngle), -cosf(dogAngle) };
-		dogRight = Vector2Scale({ cosf(dogAngle), -sinf(dogAngle) }, dogFlipped ? -1.f : 1.f);
 
 		switch (state)
 		{
@@ -129,10 +128,23 @@ int main()
 
 			// Dog hopping
 			{
-				if (pos.x > 1280.f) dogFlipped = true;
-				if (pos.x < 0.f) dogFlipped = false;
-
-				pos = Vector2Add(pos, Vector2Scale(dogRight, (dogFlipped ? -1.f : 1.f) * 280.f * dt));
+				// Rotate when walking on curves
+				if (currentRotTarget.angularSpeed != 0.f)
+				{
+					dogAngle += currentRotTarget.angularSpeed * dt;
+					if (currentRotTarget.angularSpeed > 0 && dogAngle >= currentRotTarget.targetAngle ||
+						currentRotTarget.angularSpeed < 0 && dogAngle <= currentRotTarget.targetAngle)
+					{
+						dogAngle = currentRotTarget.targetAngle;
+						while (dogAngle < 0.f) dogAngle += 360.f;
+						while (dogAngle >= 360.f) dogAngle -= 360.f;
+						currentRotTarget = DogRotationTarget();
+					}
+				}
+				dogUp = { sinf(dogAngle * DEG2RAD), -cosf(dogAngle * DEG2RAD) };
+				dogRight = Vector2Scale({ cosf(dogAngle * DEG2RAD), sinf(dogAngle * DEG2RAD) }, dogFlipped ? -1.f : 1.f);
+				
+				pos = Vector2Add(pos, Vector2Scale(dogRight, 280.f * dt));
 
 				hopOffset += (frame == 2 ? -100.f : 100.f) * dt;
 				if (hopOffset > 0.f) hopOffset = 0.f;
@@ -144,9 +156,18 @@ int main()
 				// TODO: Use GetMusicTimePlayed(music) to ensure we're synced up, in case someone drags the window and pauses the game or something
 			}
 
+			//
 			// TODO: Check collision with camera zone to change camera parameters
-
-			// TODO: Check if walking over curve; initiate rotation if so
+			//
+			
+			// Check if walking over curve; initiate rotation if so
+			for (int i = 0; i < game->curvesCount; i++)
+			{
+				Curve& curve = game->curves[i];
+				DogRotationTarget rotTarget = curve.GetRotationTarget(pos, dogUp, dogRight);
+				if (rotTarget.angularSpeed != 0.f)
+					currentRotTarget = rotTarget;
+			}
 
 			// Check if we're standing on anything
 			float minFloorDist = FLT_MAX;
@@ -156,7 +177,7 @@ int main()
 				Vector2 floorCenter = Vector2Lerp(start, end, 0.5f);
 				float dogXToFloor = Vector2DotProduct(Vector2Subtract(pos, floorCenter), dogRight);
 				float floorLength = Vector2DotProduct(Vector2Subtract(end, start), dogRight);
-				if (fabs(dogXToFloor) < floorLength / 2.f + 64.f)
+				if (fabs(dogXToFloor) < fabs(floorLength) / 2.f + 64.f)
 				{
 					Vector2 closestFloorPos = Vector2Lerp(start, end, dogXToFloor / floorLength + 0.5f);
 					float dist = Vector2DotProduct(Vector2Subtract(pos, closestFloorPos), dogUp);
@@ -183,29 +204,32 @@ int main()
 			}
 
 			// Are we falling?
-			if (minFloorDist == FLT_MAX || minFloorDist > 100.f)
+			if (currentRotTarget.angularSpeed == 0.f)
 			{
-				fallingSpeed += 1000.f * dt;
-				pos = Vector2Add(pos, Vector2Scale(dogUp, -fallingSpeed * dt));
-			}
-			else
-			{
-				pos = minPos;
-				fallingSpeed = 0.f;
+				if (minFloorDist == FLT_MAX || minFloorDist > 100.f)
+				{
+					fallingSpeed += 1000.f * dt;
+					pos = Vector2Add(pos, Vector2Scale(dogUp, -fallingSpeed * dt));
+				}
+				else
+				{
+					pos = minPos;
+					fallingSpeed = 0.f;
+				}
 			}
 
 			// AABB check
-			float dogTop = dogHitBox.y;
-			float dogBot = dogHitBox.y + dogHitBox.height;
-			float dogLeft = dogHitBox.x;
-			float dogRight = dogHitBox.x + dogHitBox.width;
+			float dogHBoxTop = dogHitBox.y;
+			float dogHBoxBot = dogHitBox.y + dogHitBox.height;
+			float dogHBoxLeft = dogHitBox.x;
+			float dogHBoxRight = dogHitBox.x + dogHitBox.width;
 			auto CheckDogHit = [&](Vector2 _pos, float _width, float _height)
 			{
 				float blockTop = _pos.y - _height / 2.f;
 				float blockBot = _pos.y + _height / 2.f;
 				float blockLeft = _pos.x - _width / 2.f;
 				float blockRight = _pos.x + _width / 2.f;
-				return dogTop < blockBot && dogBot > blockTop && dogLeft < blockRight && dogRight > blockLeft;
+				return dogHBoxTop < blockBot && dogHBoxBot > blockTop && dogHBoxLeft < blockRight && dogHBoxRight > blockLeft;
 			};
 
 			// Check collision with reverser
@@ -281,10 +305,11 @@ int main()
 			for (int i = 0; i < game->reversersCount; i++)
 				game->reversers[i].Draw(texReverserBackEnabled, texReverserBackDisabled, texReverserOutline, texReverserArrows);
 
-			Vector2 drawPos = Vector2Add({ pos.x, pos.y + hopOffset}, Vector2Scale(dogRight, dogFlipped ? -12.f : 12.f));
+			Vector2 offsetPos = Vector2Add(pos, Vector2Scale(dogUp, -hopOffset));
+			Vector2 drawPos = Vector2Add(offsetPos, Vector2Scale(dogRight, dogFlipped ? -12.f : 12.f));
 			dogBack.Draw(texDogBack[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, false);
 			dogOutline.Draw(texDogOutline[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, true);
-			DrawRectangleLines((int)pos.x - 8.f, (int)pos.y - 8.f, 16, 16, RED);
+			//DrawRectangleLines((int)pos.x - 8.f, (int)pos.y - 8.f, 16, 16, RED);
 
 			EndMode2D();
 

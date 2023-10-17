@@ -173,33 +173,44 @@ void Curve::Draw(Texture2D& lineTex, Texture2D& paintTex)
 	Vector2 origin = { 64.f, 64.f };
 	DrawTexturePro(paintTex, srcRect, dstRect, origin, 0.f, WHITE);
 	DrawTexturePro(lineTex, srcRect, dstRect, origin, 0.f, WHITE);
+}
 
+bool Curve::HitCurve(Vector2 dogPos, Vector2 offset)
+{
+	const float amt = 48.f;
+	Vector2 p = { pos.x + offset.x, pos.y + offset.y };
+	return dogPos.x - (p.x - amt) > 0.f && dogPos.x - (p.x + amt) < 0.f && dogPos.y - (p.y - amt) > 0.f && dogPos.y - (p.y + amt) < 0.f;
+}
+
+DogRotationTarget Curve::GetRotationTarget(Vector2 point, Vector2 up, Vector2 right)
+{
 	if (type == SE)
 	{
-		DrawRectangleLines(pos.x - 96.f, pos.y - 64.f, 32.f, 32.f, BLUE);
-		DrawRectangleLines(pos.x - 64.f, pos.y - 96.f, 32.f, 32.f, BLUE);
-		DrawRectangleLines(pos.x - 96.f, pos.y + 128.f, 32.f, 32.f, BLUE);
-		DrawRectangleLines(pos.x + 128.f, pos.y - 96.f, 32.f, 32.f, BLUE);
-	}
+		if (HitCurve(point, { -16.f, 128.f }) && right.x ==  1.f && up.y ==  1.f) return {  90.f,  -80.f };
+		if (HitCurve(point, { -96.f, -64.f }) && right.x ==  1.f && up.y == -1.f) return { -90.f, -240.f };
+		if (HitCurve(point, { -64.f, -96.f }) && right.y ==  1.f && up.x == -1.f) return { 360.f,  240.f };
+		if (HitCurve(point, { 128.f, -16.f }) && right.y ==  1.f && up.x ==  1.f) return { 180.f,   80.f };
+	} 
 	else if (type == SW)
 	{
-		DrawRectangleLines(pos.x + 64.f, pos.y - 64.f, 32.f, 32.f, BLUE);
-		DrawRectangleLines(pos.x + 32.f, pos.y - 96.f, 32.f, 32.f, BLUE);
-		DrawRectangleLines(pos.x + 64.f, pos.y + 128.f, 32.f, 32.f, BLUE);
-		DrawRectangleLines(pos.x - 160.f, pos.y - 96.f, 32.f, 32.f, BLUE);
+		if (HitCurve(point, { -16.f, 128.f }) && right.x == -1.f && up.y ==  1.f) return { 270.f,   80.f };
+		if (HitCurve(point, {  64.f, -64.f }) && right.x == -1.f && up.y == -1.f) return {  90.f,  240.f };
+		if (HitCurve(point, {  32.f, -96.f }) && right.y ==  1.f && up.x ==  1.f) return {   0.f, -240.f };
+		if (HitCurve(point, {-160.f, -16.f }) && right.y ==  1.f && up.x == -1.f) return { 180.f,  -80.f };
 	}
 	else if (type == NE)
 	{
-		DrawRectangleLines(pos.x - 96.f, pos.y + 32.f, 32.f, 32.f, BLUE);
-		DrawRectangleLines(pos.x - 64.f, pos.y + 64.f, 32.f, 32.f, BLUE);
-		DrawRectangleLines(pos.x - 96.f, pos.y - 160.f, 32.f, 32.f, BLUE);
-		DrawRectangleLines(pos.x + 128.f, pos.y + 64.f, 32.f, 32.f, BLUE);
+		if (HitCurve(point, { -16.f,-160.f }) && right.x ==  1.f && up.y == -1.f) return {  90.f,   80.f };
+		if (HitCurve(point, { -96.f,  32.f }) && right.x ==  1.f && up.y ==  1.f) return { 270.f,  240.f };
+		if (HitCurve(point, { -64.f,  64.f }) && right.y == -1.f && up.x == -1.f) return { 180.f, -240.f };
+		if (HitCurve(point, { 128.f, -16.f }) && right.y == -1.f && up.x ==  1.f) return {   0.f,  -80.f };
 	}
-	else if (type == NW)
+	else
 	{
-		DrawRectangleLines(pos.x + 64.f, pos.y + 32.f, 32.f, 32.f, BLUE);
-		DrawRectangleLines(pos.x + 32.f, pos.y + 64.f, 32.f, 32.f, BLUE);
-		DrawRectangleLines(pos.x + 64.f, pos.y - 160.f, 32.f, 32.f, BLUE);
-		DrawRectangleLines(pos.x - 160.f, pos.y + 64.f, 32.f, 32.f, BLUE);
+		if (HitCurve(point, { -16.f,-160.f }) && right.x == -1.f && up.y == -1.f) return { -90.f,  -80.f };
+		if (HitCurve(point, {  64.f,  32.f }) && right.x == -1.f && up.y ==  1.f) return {  90.f, -240.f };
+		if (HitCurve(point, {  32.f,  64.f }) && right.y == -1.f && up.x ==  1.f) return { 180.f,  240.f };
+		if (HitCurve(point, {-160.f, -16.f }) && right.y == -1.f && up.x == -1.f) return { 360.f,   80.f };
 	}
+	return DogRotationTarget();
 }
