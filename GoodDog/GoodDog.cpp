@@ -22,6 +22,7 @@ int main()
 		LoadTexture("resources/dog_hop1_outline.png"),
 		LoadTexture("resources/dog_hop2_outline.png"),
 	};
+	Texture2D texDogLose = LoadTexture("resources/dog_lose_outline.png");
 	Texture2D texDogBack[] = { 
 		LoadTexture("resources/dog_back.png"),
 		LoadTexture("resources/dog_hop1_back.png"),
@@ -39,6 +40,11 @@ int main()
 	Texture2D texCurveSolid = LoadTexture("resources/curve_solid.png");
 	Texture2D texCurveOutline = LoadTexture("resources/curve_outline.png");
 	Texture2D texBG = LoadTexture("resources/bg.png");
+
+	const char* loseText = "Bad dog :(";
+	const char* winText = "Good dog :)";
+	int loseTextWidth = MeasureText(loseText, 80);
+	int winTextWidth = MeasureText(winText, 80);
 
 	GameState state = CUTSCENE;
 
@@ -58,6 +64,7 @@ int main()
 	game->AddFloor({ 18.f, 540.f }, { 18.f, 252.f });
 	game->AddCurve({ 64.f, 604.f }, SW);
 	game->AddReverser({ 350.f, 526.f }, { 30.f, 426.f }, Left, Button::A);
+	game->AddDangerBlock({ 850.f, 526.f }, { 650.f, 526.f }, { 60.f, 220.f }, Button::A);
 
 	game->camera.offset = { 0.f, 0.f };
 	game->camera.rotation = 0.f;
@@ -75,6 +82,13 @@ int main()
 	float hopOffset = 0.f;
 	float fallingSpeed = 0.f;
 	DogRotationTarget currentRotTarget;
+
+	auto Lose = [&]()
+	{
+		fallingSpeed = -900.f;
+		state = LOSE;
+		// TODO: play sad sound
+	};
 
 	while (!WindowShouldClose())
 	{
@@ -252,8 +266,7 @@ int main()
 					}
 					else if (block.enabled == 0.f)
 					{
-						state = LOSE;
-						// TODO: play sad sound
+						Lose();
 					}
 					break;
 				}
@@ -266,8 +279,7 @@ int main()
 				Vector2 blockPos = block.GetCurrentPos();
 				if (CheckDogHit(blockPos, block.dimensions.x, block.dimensions.y))
 				{
-					state = LOSE;
-					// TODO: play sad sound
+					Lose();
 					break;
 				}
 			}
@@ -276,7 +288,6 @@ int main()
 		}
 		case WIN:
 		{
-			
 			// TODO
 			break;
 		}
@@ -284,7 +295,8 @@ int main()
 		{
 			StopMusicStream(music); // TODO: Fade music out to avoid pop
 			frame = 2;
-			// TODO: Make dog fall off screen
+			fallingSpeed += 3000.f * dt;
+			pos = Vector2Add(pos, Vector2Scale(dogUp, -fallingSpeed * dt));
 			break;
 		}
 		}
@@ -313,8 +325,19 @@ int main()
 			Vector2 offsetPos = Vector2Add(pos, Vector2Scale(dogUp, -hopOffset));
 			Vector2 drawPos = Vector2Add(offsetPos, Vector2Scale(dogRight, dogFlipped ? -12.f : 12.f));
 			dogBack.Draw(texDogBack[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, false);
-			dogOutline.Draw(texDogOutline[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, true);
+			dogOutline.Draw(state == LOSE ? texDogLose : texDogOutline[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, true);
 			//DrawRectangleLines((int)pos.x - 8.f, (int)pos.y - 8.f, 16, 16, RED);
+
+			if (state == LOSE)
+			{
+				DrawText(loseText, 640 - loseTextWidth / 2, 320, 80, BLACK);
+				DrawText(loseText, 643 - loseTextWidth / 2, 323, 80, WHITE);
+			}
+			else if (state == WIN)
+			{
+				DrawText(winText, 640 - winTextWidth / 2, 320, 80, BLACK);
+				DrawText(winText, 643 - winTextWidth / 2, 323, 80, WHITE);
+			}
 
 			EndMode2D();
 

@@ -173,7 +173,7 @@ struct Game
 	int curvesCount = 0;
 	int cameraZonesCount = 0;
 
-	Camera2D camera;
+	Camera2D camera = {};
 
 	Game() {}
 	void AddFloor(Vector2 start, Vector2 end);
