@@ -126,7 +126,7 @@ int main()
 		{
 			UpdateMusicStream(music);
 
-			// Dog hopping
+			// Update dog position
 			{
 				// Rotate when walking on curves
 				if (currentRotTarget.angularSpeed != 0.f)
@@ -146,6 +146,7 @@ int main()
 				
 				pos = Vector2Add(pos, Vector2Scale(dogRight, 280.f * dt));
 
+				// Dog hopping
 				hopOffset += (frame == 2 ? -100.f : 100.f) * dt;
 				if (hopOffset > 0.f) hopOffset = 0.f;
 				if (hopOffset < -20.f) hopOffset = -20.f;
@@ -156,9 +157,13 @@ int main()
 				// TODO: Use GetMusicTimePlayed(music) to ensure we're synced up, in case someone drags the window and pauses the game or something
 			}
 
-			//
-			// TODO: Check collision with camera zone to change camera parameters
-			//
+			// Update camera when you hit a camera zone
+			for (int i = 0; i < game->cameraZonesCount; i++)
+			{
+				CameraZone& cameraZone = game->cameraZones[i];
+				if (cameraZone.ContainsPoint(pos))
+					game->camera = cameraZone.params;
+			}
 			
 			// Check if walking over curve; initiate rotation if so
 			for (int i = 0; i < game->curvesCount; i++)

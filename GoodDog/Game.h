@@ -138,6 +138,17 @@ struct Curve
 	DogRotationTarget GetRotationTarget(Vector2 point, Vector2 up, Vector2 right);
 };
 
+struct CameraZone
+{
+	Vector2 pos = {};
+	Vector2 size = {};
+	Camera2D params;
+
+	CameraZone() {}
+	CameraZone(Vector2 _pos, Vector2 _size, Camera2D _params);
+	bool ContainsPoint(Vector2 _point);
+};
+
 enum GameState
 {
 	CUTSCENE,
@@ -153,12 +164,14 @@ struct Game
 	DangerBlock dangerBlocks[256] = {};
 	Elevator elevators[256] = {};
 	Reverser reversers[256] = {};
+	CameraZone cameraZones[256] = {};
 
 	int floorsCount = 0;
 	int reversersCount = 0;
 	int elevatorsCount = 0;
 	int dangerBlocksCount = 0;
 	int curvesCount = 0;
+	int cameraZonesCount = 0;
 
 	Camera2D camera;
 
@@ -168,4 +181,5 @@ struct Game
 	void AddElevator(Vector2 start, Vector2 end, Vector2 newStart, Vector2 newEnd, float travelTime, Button button);
 	void AddDangerBlock(Vector2 pos1, Vector2 pos2, Vector2 size, Button button);
 	void AddReverser(Vector2 pos1, Vector2 pos2, Direction dir, Button button);
+	void AddCameraZone(Vector2 pos, Vector2 size, Camera2D params);
 };

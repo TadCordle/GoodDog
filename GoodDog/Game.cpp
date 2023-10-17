@@ -25,6 +25,11 @@ void Game::AddReverser(Vector2 pos1, Vector2 pos2, Direction dir, Button button)
 	reversers[reversersCount++] = Reverser(pos1, pos2, dir, button);
 }
 
+void Game::AddCameraZone(Vector2 pos, Vector2 size, Camera2D params)
+{
+	cameraZones[cameraZonesCount++] = CameraZone(pos, size, params);
+}
+
 Floor::Floor(Vector2 _start, Vector2 _end)
 {
 	start = _start;
@@ -213,4 +218,19 @@ DogRotationTarget Curve::GetRotationTarget(Vector2 point, Vector2 up, Vector2 ri
 		if (HitCurve(point, {-160.f, -16.f }) && right.y == -1.f && up.x == -1.f) return { 360.f,   80.f };
 	}
 	return DogRotationTarget();
+}
+
+CameraZone::CameraZone(Vector2 _pos, Vector2 _size, Camera2D _params)
+{
+	pos = _pos;
+	size = _size;
+	params = _params;
+}
+
+bool CameraZone::ContainsPoint(Vector2 point)
+{
+	return point.x < pos.x + size.x / 2.f && 
+		   point.x > pos.x - size.x / 2.f && 
+		   point.y > pos.y - size.y / 2.f && 
+		   point.y < pos.x - size.y / 2.f;
 }
