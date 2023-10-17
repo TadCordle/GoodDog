@@ -38,7 +38,18 @@ enum Button {
 	Z = KEY_Z 
 };
 
-enum CurveType { NE, SE, SW, NW };
+enum CurveType { 
+	NE, 
+	SE, 
+	SW, 
+	NW 
+};
+
+struct DogRotationTarget
+{
+	float targetAngle;
+	bool fast;
+};
 
 struct Floor
 {

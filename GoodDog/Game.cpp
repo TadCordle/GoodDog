@@ -173,4 +173,33 @@ void Curve::Draw(Texture2D& lineTex, Texture2D& paintTex)
 	Vector2 origin = { 64.f, 64.f };
 	DrawTexturePro(paintTex, srcRect, dstRect, origin, 0.f, WHITE);
 	DrawTexturePro(lineTex, srcRect, dstRect, origin, 0.f, WHITE);
+
+	if (type == SE)
+	{
+		DrawRectangleLines(pos.x - 96.f, pos.y - 64.f, 32.f, 32.f, BLUE);
+		DrawRectangleLines(pos.x - 64.f, pos.y - 96.f, 32.f, 32.f, BLUE);
+		DrawRectangleLines(pos.x - 96.f, pos.y + 128.f, 32.f, 32.f, BLUE);
+		DrawRectangleLines(pos.x + 128.f, pos.y - 96.f, 32.f, 32.f, BLUE);
+	}
+	else if (type == SW)
+	{
+		DrawRectangleLines(pos.x + 64.f, pos.y - 64.f, 32.f, 32.f, BLUE);
+		DrawRectangleLines(pos.x + 32.f, pos.y - 96.f, 32.f, 32.f, BLUE);
+		DrawRectangleLines(pos.x + 64.f, pos.y + 128.f, 32.f, 32.f, BLUE);
+		DrawRectangleLines(pos.x - 160.f, pos.y - 96.f, 32.f, 32.f, BLUE);
+	}
+	else if (type == NE)
+	{
+		DrawRectangleLines(pos.x - 96.f, pos.y + 32.f, 32.f, 32.f, BLUE);
+		DrawRectangleLines(pos.x - 64.f, pos.y + 64.f, 32.f, 32.f, BLUE);
+		DrawRectangleLines(pos.x - 96.f, pos.y - 160.f, 32.f, 32.f, BLUE);
+		DrawRectangleLines(pos.x + 128.f, pos.y + 64.f, 32.f, 32.f, BLUE);
+	}
+	else if (type == NW)
+	{
+		DrawRectangleLines(pos.x + 64.f, pos.y + 32.f, 32.f, 32.f, BLUE);
+		DrawRectangleLines(pos.x + 32.f, pos.y + 64.f, 32.f, 32.f, BLUE);
+		DrawRectangleLines(pos.x + 64.f, pos.y - 160.f, 32.f, 32.f, BLUE);
+		DrawRectangleLines(pos.x - 160.f, pos.y + 64.f, 32.f, 32.f, BLUE);
+	}
 }

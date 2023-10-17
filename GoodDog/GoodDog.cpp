@@ -49,14 +49,14 @@ int main()
 	//game->AddReverser({ 1030.f, 426.f }, { 1030.f, 426.f }, Left, Button::A);
 	//game->AddDangerBlock({ 1030.f, 426.f }, { 1030.f, 426.f }, { 60.f, 220.f }, Button::A);
 
-	game->AddFloor({ 18.f, 540.f }, { 18.f, 252.f });
-	game->AddCurve({ 64.f, 604.f }, SW);
 	game->AddFloor({ 128.f, 652.f }, { 1152.f, 652.f });
 	game->AddCurve({ 1216.f, 604.f }, SE);
 	game->AddFloor({ 1260.f, 540.f }, { 1260.f, 252.f });
 	game->AddCurve({ 1216.f, 192.f }, NE);
 	game->AddFloor({ 128.f, 144.f }, { 1152.f, 144.f });
 	game->AddCurve({ 64.f, 192.f }, NW);
+	game->AddFloor({ 18.f, 540.f }, { 18.f, 252.f });
+	game->AddCurve({ 64.f, 604.f }, SW);
 
 	game->camera.offset = { 0.f, 0.f };
 	game->camera.rotation = 0.f;
@@ -89,6 +89,9 @@ int main()
 			game->reversers[i].Update(dt, WALL_WOBBLE_RATE);
 
 		Rectangle dogHitBox = { pos.x - 48.f, pos.y - 48.f, 96.f, 96.f };
+
+		dogUp = { sinf(dogAngle), -cosf(dogAngle) };
+		dogRight = Vector2Scale({ cosf(dogAngle), -sinf(dogAngle) }, dogFlipped ? -1.f : 1.f);
 
 		switch (state)
 		{
@@ -281,7 +284,7 @@ int main()
 			Vector2 drawPos = Vector2Add({ pos.x, pos.y + hopOffset}, Vector2Scale(dogRight, dogFlipped ? -12.f : 12.f));
 			dogBack.Draw(texDogBack[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, false);
 			dogOutline.Draw(texDogOutline[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, true);
-			//DrawRectangleLines((int)dogHitBox.x, (int)dogHitBox.y, (int)dogHitBox.width, (int)dogHitBox.height, RED);
+			DrawRectangleLines((int)pos.x - 8.f, (int)pos.y - 8.f, 16, 16, RED);
 
 			EndMode2D();
 
