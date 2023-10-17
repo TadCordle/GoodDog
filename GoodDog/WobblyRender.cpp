@@ -38,6 +38,19 @@ void WobblyTexture::Draw(Texture2D& texture, Vector2 pos, Vector2 scale, float a
 	DrawTexturePro(texture, srcRect, dstRect, origin, angle + randAngle, color);
 }
 
+void WobblyTexture::DrawRegion(Texture2D& texture, Rectangle srcRect, Vector2 pos, Vector2 size)
+{
+	float randOffX = hash_float(wobbleState) * 5.f - 2.5f;
+	float randOffY = hash_float(wobbleState + 1) * 5.f - 2.5f;
+	//float randScaleX = hash_float(wobbleState + 2) * 0.1f + 0.95f;
+	//float randScaleY = hash_float(wobbleState + 3) * 0.1f + 0.95f;
+	//float randAngle = hash_float(wobbleState + 4) * 2.f - 1.f;
+
+	Rectangle dstRect = { pos.x + randOffX, pos.y + randOffY, size.x, size.y };
+	Vector2 origin = { size.x / 2.f, size.y / 2.f };
+	DrawTexturePro(texture, srcRect, dstRect, origin, 0, WHITE);
+}
+
 WobblyLine::WobblyLine()
 {
 	wobbleTime = 0.f;

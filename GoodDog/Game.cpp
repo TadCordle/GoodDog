@@ -163,5 +163,16 @@ void Curve::Update(float dt, float wobbleRate)
 
 void Curve::Draw(Texture2D& lineTex, Texture2D& paintTex)
 {
-	// TODO
+	Rectangle srcRect = {};
+	switch (type)
+	{
+		case NE: srcRect = { 128.f,   0.f, 128.f, 128.f }; break;
+		case SE: srcRect = { 128.f, 128.f, 128.f, 128.f }; break;
+		case SW: srcRect = {   0.f, 128.f, 128.f, 128.f }; break;
+		case NW: srcRect = {   0.f,   0.f, 128.f, 128.f }; break;
+	}
+
+	Rectangle dstRect = { pos.x, pos.y, 128.f, 128.f };
+	DrawTexturePro(paintTex, srcRect, dstRect, { 64.f, 64.f }, 0.f, WHITE);
+	texOutline.DrawRegion(lineTex, srcRect, pos, { 128.f, 128.f });
 }
