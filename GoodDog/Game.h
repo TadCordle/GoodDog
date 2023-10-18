@@ -154,7 +154,8 @@ enum GameState
 	CUTSCENE,
 	GOING,
 	WIN,
-	LOSE
+	LOSE,
+	EDITOR
 };
 
 struct Game
@@ -175,6 +176,8 @@ struct Game
 
 	Camera2D camera = {};
 
+	Vector2 dogStartingPos = {};
+
 	Game() {}
 	void AddFloor(Vector2 start, Vector2 end);
 	void AddCurve(Vector2 pos, CurveType type);
@@ -182,4 +185,36 @@ struct Game
 	void AddDangerBlock(Vector2 pos1, Vector2 pos2, Vector2 size, Button button);
 	void AddReverser(Vector2 pos1, Vector2 pos2, Direction dir, Button button);
 	void AddCameraZone(Vector2 pos, Vector2 size, Camera2D params);
+};
+
+enum AssetType
+{
+	ATNone,
+	ATFloor,
+	ATCurve,
+	ATElevator,
+	ATDangerBlock,
+	ATReverser,
+	ATCameraZone
+
+	// TODO: Checkpoint
+	// TODO: Texture
+	// TODO: Shades
+	// TODO: Hat
+	// TODO: Ball
+};
+
+struct EditorState
+{
+	AssetType placingAsset = ATNone;
+	int placingStep = 0;
+
+	Vector2 v1 = {};
+	Vector2 v2 = {};
+	Vector2 v3 = {};
+	Vector2 v4 = {};
+	float v5 = 0.f;
+	Button button = Button::None;
+
+	void UpdatePlacing(AssetType at) { placingAsset = at; placingStep = 0; };
 };

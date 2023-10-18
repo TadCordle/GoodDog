@@ -10,13 +10,6 @@ int main()
 
 	Music music = LoadMusicStream("resources/music.wav");
 
-	Vector2 pos = { 600.f, 550.f };
-	float dogSpriteScale = 0.75f;
-	float dogAngle = 0.f;
-	bool dogFlipped = true;
-	Vector2 dogUp = { 0.f, -1.f };
-	Vector2 dogRight = { 1.f, 0.f };
-
 	Texture2D texDogOutline[] = {
 		LoadTexture("resources/dog_outline.png"),
 		LoadTexture("resources/dog_hop1_outline.png"),
@@ -41,14 +34,19 @@ int main()
 	Texture2D texCurveOutline = LoadTexture("resources/curve_outline.png");
 	Texture2D texBG = LoadTexture("resources/bg.png");
 
+	WobblyTexture dogOutline, dogBack;
+
 	const char* loseText = "Bad dog :(";
 	const char* winText = "Good dog :)";
 	int loseTextWidth = MeasureText(loseText, 80);
 	int winTextWidth = MeasureText(winText, 80);
 
-	GameState state = CUTSCENE;
+	GameState state = EDITOR;
+	EditorState editor;
 
 	Game* game = new Game();
+	game->dogStartingPos = { 600.f, 550.f };
+
 	//game->AddFloor({ 1000.f, 300.f }, { 1280.f, 300.f });
 	//game->AddElevator({ 500.f, 300.f }, { 1000.f, 300.f }, { 500.f, 552.f }, { 1000.f, 552.f }, 0.3f, Button::W);
 	//game->AddReverser({ 30.f, 426.f }, { 30.f, 426.f }, Right, Button::A);
@@ -71,17 +69,21 @@ int main()
 	game->camera.zoom = 1.f;
 	game->camera.target = { 0.f, 0.f };
 
-	WobblyTexture dogOutline, dogBack;
-	
-	// Cutscene state
-	float cutsceneTimer = 0.f;
-
 	// Gameplay state
+	Vector2 pos = game->dogStartingPos;
+	float dogAngle = 0.f;
+	bool dogFlipped = true;
+	Vector2 dogUp = { 0.f, -1.f };
+	Vector2 dogRight = { 1.f, 0.f };
+
 	double hopTimer = -HOP_TIMER / 2.f;
 	int frame = 0;
 	float hopOffset = 0.f;
 	float fallingSpeed = 0.f;
 	DogRotationTarget currentRotTarget;
+
+	// Cutscene state
+	float cutsceneTimer = 0.f;
 
 	auto Lose = [&]()
 	{
@@ -95,14 +97,17 @@ int main()
 		float dt = GetFrameTime();
 		if (dt > 0.03333333f) dt = 0.03333333f;
 
-		for (int i = 0; i < game->dangerBlocksCount; i++)
-			game->dangerBlocks[i].Update(dt, WALL_WOBBLE_RATE);
-		for (int i = 0; i < game->floorsCount; i++)
-			game->floors[i].Update(dt, WALL_WOBBLE_RATE);
-		for (int i = 0; i < game->elevatorsCount; i++)
-			game->elevators[i].Update(dt, WALL_WOBBLE_RATE);
-		for (int i = 0; i < game->reversersCount; i++)
-			game->reversers[i].Update(dt, WALL_WOBBLE_RATE);
+		if (state != EDITOR)
+		{
+			for (int i = 0; i < game->dangerBlocksCount; i++)
+				game->dangerBlocks[i].Update(dt, WALL_WOBBLE_RATE);
+			for (int i = 0; i < game->floorsCount; i++)
+				game->floors[i].Update(dt, WALL_WOBBLE_RATE);
+			for (int i = 0; i < game->elevatorsCount; i++)
+				game->elevators[i].Update(dt, WALL_WOBBLE_RATE);
+			for (int i = 0; i < game->reversersCount; i++)
+				game->reversers[i].Update(dt, WALL_WOBBLE_RATE);
+		}
 
 		Rectangle dogHitBox = { pos.x - 48.f, pos.y - 48.f, 96.f, 96.f };
 
@@ -299,6 +304,188 @@ int main()
 			pos = Vector2Add(pos, Vector2Scale(dogUp, -fallingSpeed * dt));
 			break;
 		}
+		case EDITOR:
+		{
+			// Zoom
+			float mouseWheel = GetMouseWheelMove();
+			if (mouseWheel != 0.f)
+			{
+				Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), game->camera);
+				game->camera.offset = GetMousePosition();
+				game->camera.target = mouseWorldPos;
+
+				// zoom
+				game->camera.zoom += mouseWheel * 0.125f;
+				if (game->camera.zoom < 0.125f) game->camera.zoom = 0.125f;
+				if (game->camera.zoom > 3.000f) game->camera.zoom = 3.000f;
+			}
+
+			// Pan
+			if (IsMouseButtonDown(MouseButton::MOUSE_BUTTON_MIDDLE))
+			{
+				Vector2 mouseOffset = GetMouseDelta();
+				mouseOffset = Vector2Scale(mouseOffset, -1.0f / game->camera.zoom);
+				game->camera.target = Vector2Add(game->camera.target, mouseOffset);
+			}
+
+			Vector2 placingPos = GetScreenToWorld2D(GetMousePosition(), game->camera);
+			placingPos.x = (int)(placingPos.x * 4.f) / 4;
+			placingPos.y = (int)(placingPos.y * 4.f) / 4;
+
+			// Select item
+			if (IsKeyPressed(KeyboardKey::KEY_KP_0)) editor.UpdatePlacing(ATNone);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_1)) editor.UpdatePlacing(ATFloor);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_2)) editor.UpdatePlacing(ATCurve);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_3)) editor.UpdatePlacing(ATElevator);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_4)) editor.UpdatePlacing(ATDangerBlock);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_5)) editor.UpdatePlacing(ATReverser);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_6)) editor.UpdatePlacing(ATCameraZone);
+
+			// If curve or reverser is selected, choose direction
+			if (editor.placingAsset == ATCurve || editor.placingAsset == ATReverser)
+			{
+				if (IsKeyPressed(KeyboardKey::KEY_R))
+				{
+					editor.v5++;
+					if (editor.v5 > 3.f)
+						editor.v5 = 0.f;
+				}
+			}
+
+			if (editor.placingAsset != ATNone)
+			{
+				if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT))
+				{
+					switch (editor.placingAsset)
+					{
+					case ATFloor:
+					{
+						if (editor.placingStep == 0)
+						{
+							// Foor start
+							editor.v1 = placingPos;
+							editor.placingStep++;
+						}
+						else if (editor.placingStep == 1)
+						{
+							// Floor end
+							game->AddFloor(editor.v1, placingPos);
+							editor.placingStep = 0;
+						}
+						break;
+					}
+					case ATCurve:
+					{
+						CurveType ctype;
+						if (editor.v5 == 0.f) ctype = SE;
+						else if (editor.v5 == 1.f) ctype = NE;
+						else if (editor.v5 == 2.f) ctype = NW;
+						else if (editor.v5 == 3.f) ctype = SW;
+						game->AddCurve(placingPos, ctype);
+						editor.placingStep = 0;
+						break;
+					}
+					case ATElevator:
+					{
+						if (editor.placingStep == 0)
+						{
+							// Elevator start
+							editor.v1 = placingPos;
+							editor.placingStep++;
+						}
+						else if (editor.placingStep == 1)
+						{
+							// Elevator end
+							editor.v2 = placingPos;
+							editor.placingStep++;
+						}
+						else if (editor.placingStep == 2)
+						{
+							// Elevator start move position
+							editor.v3 = placingPos;
+							editor.placingStep++;
+						}
+						else if (editor.placingStep == 3)
+						{
+							// Elevator end move position
+							editor.v4 = placingPos;
+							editor.placingStep++;
+						}
+						else if (editor.placingStep == 4)
+						{
+							// Elevator button
+							Button button = Button::A; // TODO: editor.button = choose button
+							game->AddElevator(editor.v1, editor.v2, editor.v3, editor.v4, 0.4f, button);
+							editor.placingStep = 0;
+						}
+						break;
+					}
+					case ATDangerBlock:
+					{
+						if (editor.placingStep == 0)
+						{
+							// Top left corner
+							editor.v1 = placingPos;
+							editor.placingStep++;
+						}
+						else if (editor.placingStep == 1)
+						{
+							// Bottom right corner
+							editor.v2 = placingPos;
+							editor.placingStep++;
+						}
+						else if (editor.placingStep == 2)
+						{
+							// Move position
+							editor.v3 = placingPos;
+							editor.placingStep++;
+						}
+						else if (editor.placingStep == 3)
+						{
+							Button button = Button::A; // TODO: editor.button = choose button
+							game->AddDangerBlock(editor.v1, editor.v2, editor.v3, button); // TODO: actually
+							editor.placingStep = 0;
+						}
+						break;
+					}
+					case ATReverser:
+					{
+						if (editor.placingStep == 0)
+						{
+							// Top left corner
+							editor.v1 = placingPos;
+							editor.placingStep++;
+						}
+						else if (editor.placingStep == 1)
+						{
+							// Bottom right corner
+							editor.v2 = placingPos;
+							editor.placingStep++;
+						}
+						else if (editor.placingStep == 2)
+						{
+							Button button = Button::A; // TODO: editor.button = choose button
+							Direction dir;
+							if (editor.v5 == 0.f) dir = Left;
+							else if (editor.v5 == 1.f) dir = Up;
+							else if (editor.v5 == 2.f) dir = Right;
+							else if (editor.v5 == 3.f) dir = Down;
+							game->AddReverser(editor.v1, editor.v2, dir, button);
+							editor.placingStep = 0;
+						}
+						break;
+					}
+					case ATCameraZone:
+					{
+						// TODO
+						break;
+					}
+					}
+				}
+			}
+
+			break;
+		}
 		}
 
 		dogBack.Update(dt, DOG_WOBBLE_RATE);
@@ -324,8 +511,8 @@ int main()
 
 			Vector2 offsetPos = Vector2Add(pos, Vector2Scale(dogUp, -hopOffset));
 			Vector2 drawPos = Vector2Add(offsetPos, Vector2Scale(dogRight, dogFlipped ? -12.f : 12.f));
-			dogBack.Draw(texDogBack[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, false);
-			dogOutline.Draw(state == LOSE ? texDogLose : texDogOutline[frame], drawPos, { dogSpriteScale, dogSpriteScale }, dogAngle, dogFlipped, true);
+			dogBack.Draw(texDogBack[frame], drawPos, { 0.75f, 0.75f }, dogAngle, dogFlipped, false);
+			dogOutline.Draw(state == LOSE ? texDogLose : texDogOutline[frame], drawPos, { 0.75f, 0.75f }, dogAngle, dogFlipped, true);
 			//DrawRectangleLines((int)pos.x - 8.f, (int)pos.y - 8.f, 16, 16, RED);
 
 			if (state == LOSE)
@@ -337,6 +524,61 @@ int main()
 			{
 				DrawText(winText, 640 - winTextWidth / 2, 320, 80, BLACK);
 				DrawText(winText, 643 - winTextWidth / 2, 323, 80, WHITE);
+			}
+			else if (state == EDITOR)
+			{
+				Vector2 placingPos = GetScreenToWorld2D(GetMousePosition(), game->camera);
+				placingPos.x = ((int)(placingPos.x / 4.f)) * 4;
+				placingPos.y = ((int)(placingPos.y / 4.f)) * 4;
+				switch (editor.placingAsset)
+				{
+				case ATFloor:
+				{
+					if (editor.placingStep == 0)
+						DrawRectangle((int)placingPos.x - 12, (int)placingPos.y - 12, 24, 24, BLUE);
+					else
+					{
+						Floor temp;
+						temp.start = editor.v1;
+						temp.end = placingPos;
+						temp.Draw(texLine, texPaintBlue);
+					}
+					break;
+				}
+				case ATCurve:
+				{
+					CurveType ctype;
+					if (editor.v5 == 0.f) ctype = SE;
+					else if (editor.v5 == 1.f) ctype = NE;
+					else if (editor.v5 == 2.f) ctype = NW;
+					else if (editor.v5 == 3.f) ctype = SW;
+					Curve temp;
+					temp.pos = placingPos;
+					temp.type = ctype;
+					temp.Draw(texCurveOutline, texCurveSolid);
+					break;
+				}
+				case ATElevator:
+				{
+
+					break;
+				}
+				case ATDangerBlock:
+				{
+
+					break;
+				}
+				case ATReverser:
+				{
+
+					break;
+				}
+				case ATCameraZone:
+				{
+
+					break;
+				}
+				}
 			}
 
 			EndMode2D();
@@ -353,6 +595,7 @@ int main()
 	}
 	UnloadTexture(texLine);
 	UnloadTexture(texPaintBlue);
+	UnloadMusicStream(music);
 	CloseWindow();
 
 	delete game;
