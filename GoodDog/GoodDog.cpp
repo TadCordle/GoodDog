@@ -36,10 +36,11 @@ int main()
 
 	WobblyTexture dogOutline, dogBack;
 
+	Font font = LoadFontEx("resources/GamjaFlower-Regular.ttf", 80, 0, 0);
 	const char* loseText = "Bad dog :(";
 	const char* winText = "Good dog :)";
-	int loseTextWidth = MeasureText(loseText, 80);
-	int winTextWidth = MeasureText(winText, 80);
+	int loseTextWidth = MeasureTextEx(font, loseText, 80, 0).x;
+	int winTextWidth = MeasureTextEx(font, winText, 80, 0).x;
 
 	GameState state = CUTSCENE;
 	GameState prevState = CUTSCENE;
@@ -113,7 +114,6 @@ int main()
 			fallingSpeed = 0.f;
 			currentRotTarget = DogRotationTarget();
 			StopMusicStream(music);
-
 			for (int i = 0; i < game->reversersCount; i++)
 				game->reversers[i].enabled = 1.f;
 		}
@@ -728,17 +728,6 @@ int main()
 			dogOutline.Draw(state == LOSE ? texDogLose : texDogOutline[frame], drawPos, { 0.75f, 0.75f }, dogAngle, dogFlipped, true);
 			//DrawRectangleLines((int)pos.x - 8.f, (int)pos.y - 8.f, 16, 16, RED);
 
-			if (state == LOSE)
-			{
-				DrawText(loseText, 640 - loseTextWidth / 2, 320, 80, BLACK);
-				DrawText(loseText, 643 - loseTextWidth / 2, 323, 80, WHITE);
-			}
-			else if (state == WIN)
-			{
-				DrawText(winText, 640 - winTextWidth / 2, 320, 80, BLACK);
-				DrawText(winText, 643 - winTextWidth / 2, 323, 80, WHITE);
-			}
-
 			// Draw edits in progress
 			if (state == EDITOR)
 			{
@@ -852,6 +841,19 @@ int main()
 			}
 
 			EndMode2D();
+
+			if (state == LOSE)
+			{
+				// TODO: Wobble!
+				DrawTextEx(font, loseText, { 640.f - loseTextWidth / 2, 320.f }, 80, 0, BLACK);
+				DrawTextEx(font, loseText, { 643.f - loseTextWidth / 2, 323.f }, 80, 0, WHITE);
+			}
+			else if (state == WIN)
+			{
+				// TODO: Wobble
+				DrawText(winText, 640 - winTextWidth / 2, 320, 80, BLACK);
+				DrawText(winText, 643 - winTextWidth / 2, 323, 80, WHITE);
+			}
 
 			//DrawFPS(10, 10);
 		}
