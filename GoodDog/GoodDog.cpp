@@ -41,11 +41,8 @@ int main()
 	int loseTextWidth = MeasureText(loseText, 80);
 	int winTextWidth = MeasureText(winText, 80);
 
-#if 0
-	GameState state = EDITOR;
-#else
 	GameState state = CUTSCENE;
-#endif
+	GameState prevState = CUTSCENE;
 	EditorState editor;
 
 	Game* game = new Game();
@@ -85,6 +82,43 @@ int main()
 		float dt = GetFrameTime();
 		if (dt > 0.03333333f) dt = 0.03333333f;
 
+		// Toggle between editor and play mode
+		if (IsKeyPressed(KeyboardKey::KEY_F5))
+		{
+			if (state == EDITOR)
+			{
+				state = prevState;
+				if (state == GOING)
+					PlayMusicStream(music);
+			}
+			else
+			{
+				prevState = state;
+				state = EDITOR;
+				PauseMusicStream(music);
+			}
+		}
+
+		// Reset
+		if (IsKeyPressed(KeyboardKey::KEY_F6))
+		{
+			state = CUTSCENE;
+			cutsceneTimer = 0.f;
+			pos = game->dogStartingPos;
+			dogAngle = 0.f;
+			dogFlipped = true;
+			hopTimer = -HOP_TIMER / 2.f;
+			frame = 0;
+			hopOffset = 0.f;
+			fallingSpeed = 0.f;
+			currentRotTarget = DogRotationTarget();
+			StopMusicStream(music);
+
+			for (int i = 0; i < game->reversersCount; i++)
+				game->reversers[i].enabled = 1.f;
+		}
+
+		// Update entities
 		if (state != EDITOR)
 		{
 			for (int i = 0; i < game->dangerBlocksCount; i++)
