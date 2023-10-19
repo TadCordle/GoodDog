@@ -531,7 +531,27 @@ int main()
 				}
 				case ATCameraZone:
 				{
-					// TODO
+					if (editor.placingStep == 0 && clicked)
+					{
+						// Top left corner of zone
+						editor.v1 = editor.placingPos;
+						editor.placingStep++;
+					}
+					else if (editor.placingStep == 1 && clicked)
+					{
+						// Bottom right corner of zone
+						editor.v2 = editor.placingPos;
+						editor.placingStep++;
+					}
+					else if (editor.placingStep == 2 && clicked)
+					{
+						// Camera settings
+						Vector2 pos = Vector2Scale(Vector2Add(editor.v1, editor.v2), 0.5f);
+						Vector2 size = Vector2Subtract(editor.v2, editor.v1);
+						game->AddCameraZone(pos, size, game->camera);
+						printf("Camera zone assigned! %f %f %f\n", game->camera.offset.x, game->camera.offset.y, game->camera.zoom);
+						editor.placingStep = 0;
+					}
 					break;
 				}
 				}
@@ -582,6 +602,14 @@ int main()
 			// Draw edits in progress
 			if (state == EDITOR)
 			{
+				for (int i = 0; i < game->cameraZonesCount; i++)
+				{
+					CameraZone& zone = game->cameraZones[i];
+					Vector2 pos = { zone.pos.x - zone.size.x / 2.f, zone.pos.y - zone.size.y / 2.f };
+					Rectangle zoneRect = { pos.x, pos.y, zone.size.x, zone.size.y };
+					DrawRectangleLinesEx(zoneRect, 2.f / game->camera.zoom, SKYBLUE);
+				}
+
 				switch (editor.placingAsset)
 				{
 				case ATFloor:
@@ -669,7 +697,15 @@ int main()
 				}
 				case ATCameraZone:
 				{
-
+					if (editor.placingStep == 0)
+						DrawRectangle((int)editor.placingPos.x - 12, (int)editor.placingPos.y - 12, 24, 24, SKYBLUE);
+					else
+					{
+						Vector2 botRight = editor.placingStep == 1 ? editor.placingPos : editor.v2;
+						Vector2 size = Vector2Subtract(botRight, editor.v1);
+						Rectangle zoneRect = { editor.v1.x, editor.v1.y, size.x, size.y };
+						DrawRectangleLinesEx(zoneRect, 2.f / game->camera.zoom, SKYBLUE);
+					}
 					break;
 				}
 				}

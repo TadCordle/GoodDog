@@ -2,32 +2,50 @@
 
 void Game::AddFloor(Vector2 start, Vector2 end)
 {
-	floors[floorsCount++] = Floor(start, end);
+	if (floorsCount < 256)
+		floors[floorsCount++] = Floor(start, end);
+	else
+		printf("Floor limit hit!\n");
 }
 
 void Game::AddCurve(Vector2 pos, CurveType type)
 {
-	curves[curvesCount++] = Curve(pos, type);
+	if (curvesCount < 256)
+		curves[curvesCount++] = Curve(pos, type);
+	else
+		printf("Curve limit hit!\n");
 }
 
 void Game::AddElevator(Vector2 start, Vector2 end, Vector2 newStart, Vector2 newEnd, float travelTime, Button button)
 {
-	elevators[elevatorsCount++] = Elevator(start, end, newStart, newEnd, travelTime, button);
+	if (elevatorsCount < 256)	
+		elevators[elevatorsCount++] = Elevator(start, end, newStart, newEnd, travelTime, button);
+	else
+		printf("Elevator limit hit!\n");
 }
 
 void Game::AddDangerBlock(Vector2 pos1, Vector2 pos2, Vector2 size, Button button)
 {
-	dangerBlocks[dangerBlocksCount++] = DangerBlock(pos1, pos2, size, button);
+	if (dangerBlocksCount < 256)
+		dangerBlocks[dangerBlocksCount++] = DangerBlock(pos1, pos2, size, button);
+	else
+		printf("Danger block limit hit!\n");
 }
 
 void Game::AddReverser(Vector2 pos1, Vector2 pos2, Direction dir, Button button)
 {
-	reversers[reversersCount++] = Reverser(pos1, pos2, dir, button);
+	if (reversersCount < 256)
+		reversers[reversersCount++] = Reverser(pos1, pos2, dir, button);
+	else
+		printf("Reverser limit hit!\n");
 }
 
 void Game::AddCameraZone(Vector2 pos, Vector2 size, Camera2D params)
 {
-	cameraZones[cameraZonesCount++] = CameraZone(pos, size, params);
+	if (cameraZonesCount < 256)
+		cameraZones[cameraZonesCount++] = CameraZone(pos, size, params);
+	else
+		printf("Camera zone limit hit!\n");
 }
 
 Floor::Floor(Vector2 _start, Vector2 _end)
