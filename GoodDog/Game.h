@@ -38,6 +38,8 @@ enum Button {
 	Z = KEY_Z 
 };
 
+Button GetButtonFromKeyPressed();
+
 enum CurveType { 
 	NE, 
 	SE, 
@@ -195,17 +197,19 @@ enum AssetType
 	ATElevator,
 	ATDangerBlock,
 	ATReverser,
-	ATCameraZone
+	ATCameraZone,
 
-	// TODO: Checkpoint
-	// TODO: Texture
-	// TODO: Shades
-	// TODO: Hat
-	// TODO: Ball
+	// Haven't done yet
+	ATCheckpoint,
+	ATTexture,
+	ATShades,
+	ATHat,
+	ATBall
 };
 
 struct EditorState
 {
+	Vector2 placingPos = {};
 	AssetType placingAsset = ATNone;
 	int placingStep = 0;
 

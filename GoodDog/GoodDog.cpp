@@ -328,9 +328,17 @@ int main()
 				game->camera.target = Vector2Add(game->camera.target, mouseOffset);
 			}
 
-			Vector2 placingPos = GetScreenToWorld2D(GetMousePosition(), game->camera);
-			placingPos.x = (int)(placingPos.x * 4.f) / 4;
-			placingPos.y = (int)(placingPos.y * 4.f) / 4;
+			editor.placingPos = GetScreenToWorld2D(GetMousePosition(), game->camera);
+			editor.placingPos.x = ((int)(editor.placingPos.x / 4.f)) * 4.f;
+			editor.placingPos.y = ((int)(editor.placingPos.y / 4.f)) * 4.f;
+			auto SnapPlacingPos = [&](Vector2 other)
+			{
+				Vector2 diff = Vector2Subtract(editor.placingPos, other);
+				if (fabs(diff.x) > fabs(diff.y))
+					editor.placingPos.y = other.y;
+				else
+					editor.placingPos.x = other.x;
+			};
 
 			// Select item
 			if (IsKeyPressed(KeyboardKey::KEY_KP_0)) editor.UpdatePlacing(ATNone);
@@ -344,7 +352,7 @@ int main()
 			// If curve or reverser is selected, choose direction
 			if (editor.placingAsset == ATCurve || editor.placingAsset == ATReverser)
 			{
-				if (IsKeyPressed(KeyboardKey::KEY_R))
+				if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_RIGHT))
 				{
 					editor.v5++;
 					if (editor.v5 > 3.f)
@@ -354,133 +362,178 @@ int main()
 
 			if (editor.placingAsset != ATNone)
 			{
-				if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT))
+				bool clicked = IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT);
+
+				switch (editor.placingAsset)
 				{
-					switch (editor.placingAsset)
+				case ATFloor:
+				{
+					if (editor.placingStep == 0 && clicked)
 					{
-					case ATFloor:
+						// Foor start
+						editor.v1 = editor.placingPos;
+						editor.placingStep++;
+					}
+					else if (editor.placingStep == 1)
 					{
-						if (editor.placingStep == 0)
+						// Floor end
+						if (IsKeyDown(KeyboardKey::KEY_LEFT_SHIFT))  SnapPlacingPos(editor.v1);
+						if (clicked)
 						{
-							// Foor start
-							editor.v1 = placingPos;
-							editor.placingStep++;
-						}
-						else if (editor.placingStep == 1)
-						{
-							// Floor end
-							game->AddFloor(editor.v1, placingPos);
+							game->AddFloor(editor.v1, editor.placingPos);
 							editor.placingStep = 0;
 						}
-						break;
 					}
-					case ATCurve:
+					break;
+				}
+				case ATCurve:
+				{
+					if (clicked)
 					{
 						CurveType ctype;
 						if (editor.v5 == 0.f) ctype = SE;
 						else if (editor.v5 == 1.f) ctype = NE;
 						else if (editor.v5 == 2.f) ctype = NW;
 						else if (editor.v5 == 3.f) ctype = SW;
-						game->AddCurve(placingPos, ctype);
+						game->AddCurve(editor.placingPos, ctype);
 						editor.placingStep = 0;
-						break;
 					}
-					case ATElevator:
+					break;
+				}
+				case ATElevator:
+				{
+					if (editor.placingStep == 0 && clicked)
 					{
-						if (editor.placingStep == 0)
+						// Elevator start
+						editor.v1 = editor.placingPos;
+						editor.placingStep++;
+					}
+					else if (editor.placingStep == 1)
+					{
+						// Elevator end
+						if (IsKeyDown(KeyboardKey::KEY_LEFT_SHIFT))  SnapPlacingPos(editor.v1);
+						if (clicked)
 						{
-							// Elevator start
-							editor.v1 = placingPos;
+							editor.v2 = editor.placingPos;
 							editor.placingStep++;
 						}
-						else if (editor.placingStep == 1)
+					}
+					else if (editor.placingStep == 2)
+					{
+						// Elevator start move position
+						if (IsKeyDown(KeyboardKey::KEY_LEFT_SHIFT))  SnapPlacingPos(editor.v1);
+						if (clicked)
 						{
-							// Elevator end
-							editor.v2 = placingPos;
+							editor.v3 = editor.placingPos;
 							editor.placingStep++;
 						}
-						else if (editor.placingStep == 2)
+					}
+					else if (editor.placingStep == 3)
+					{
+						// Elevator end move position
+						if (IsKeyDown(KeyboardKey::KEY_LEFT_SHIFT))  SnapPlacingPos(editor.v2);
+						if (clicked)
 						{
-							// Elevator start move position
-							editor.v3 = placingPos;
+							editor.v4 = editor.placingPos;
 							editor.placingStep++;
 						}
-						else if (editor.placingStep == 3)
+					}
+					else if (editor.placingStep == 4)
+					{
+						// Button
+						Button button = GetButtonFromKeyPressed();
+						if (button != Button::None)
 						{
-							// Elevator end move position
-							editor.v4 = placingPos;
-							editor.placingStep++;
-						}
-						else if (editor.placingStep == 4)
-						{
-							// Elevator button
-							Button button = Button::A; // TODO: editor.button = choose button
+							printf("Button assigned!\n");
 							game->AddElevator(editor.v1, editor.v2, editor.v3, editor.v4, 0.4f, button);
 							editor.placingStep = 0;
 						}
-						break;
 					}
-					case ATDangerBlock:
+					break;
+				}
+				case ATDangerBlock:
+				{
+					if (editor.placingStep == 0 && clicked)
 					{
-						if (editor.placingStep == 0)
-						{
-							// Top left corner
-							editor.v1 = placingPos;
-							editor.placingStep++;
-						}
-						else if (editor.placingStep == 1)
+						// Top left corner
+						editor.v1 = editor.placingPos;
+						editor.placingStep++;
+					}
+					else if (editor.placingStep == 1)
+					{
+						if (clicked)
 						{
 							// Bottom right corner
-							editor.v2 = placingPos;
+							editor.v2 = editor.placingPos;
 							editor.placingStep++;
 						}
-						else if (editor.placingStep == 2)
+					}
+					else if (editor.placingStep == 2)
+					{
+						if (IsKeyDown(KeyboardKey::KEY_LEFT_SHIFT))  SnapPlacingPos(Vector2Scale(Vector2Add(editor.v2, editor.v1), 0.5f));
+						if (clicked)
 						{
 							// Move position
-							editor.v3 = placingPos;
+							editor.v3 = editor.placingPos;
 							editor.placingStep++;
 						}
-						else if (editor.placingStep == 3)
+					}
+					else if (editor.placingStep == 3)
+					{
+						// Button
+						Button button = GetButtonFromKeyPressed();
+						if (button != Button::None)
 						{
-							Button button = Button::A; // TODO: editor.button = choose button
-							game->AddDangerBlock(editor.v1, editor.v2, editor.v3, button); // TODO: actually
+							printf("Button assigned!\n");
+							Vector2 pos = Vector2Scale(Vector2Add(editor.v2, editor.v1), 0.5f);
+							Vector2 size = Vector2Subtract(editor.v2, editor.v1);
+							game->AddDangerBlock(pos, editor.v3, size, button);
 							editor.placingStep = 0;
 						}
-						break;
 					}
-					case ATReverser:
+					break;
+				}
+				case ATReverser:
+				{
+					if (editor.placingStep == 0 && clicked)
 					{
-						if (editor.placingStep == 0)
+						// Position 1
+						editor.v1 = editor.placingPos;
+						editor.placingStep++;
+					}
+					else if (editor.placingStep == 1)
+					{
+						if (IsKeyDown(KeyboardKey::KEY_LEFT_SHIFT))  SnapPlacingPos(editor.v1);
+						if (clicked)
 						{
-							// Top left corner
-							editor.v1 = placingPos;
+							// Position 2
+							editor.v2 = editor.placingPos;
 							editor.placingStep++;
 						}
-						else if (editor.placingStep == 1)
+					}
+					else if (editor.placingStep == 2)
+					{
+						// Button
+						Direction dir;
+						if (editor.v5 == 0.f) dir = Left;
+						else if (editor.v5 == 1.f) dir = Up;
+						else if (editor.v5 == 2.f) dir = Right;
+						else if (editor.v5 == 3.f) dir = Down;
+						Button button = GetButtonFromKeyPressed();
+						if (button != Button::None)
 						{
-							// Bottom right corner
-							editor.v2 = placingPos;
-							editor.placingStep++;
-						}
-						else if (editor.placingStep == 2)
-						{
-							Button button = Button::A; // TODO: editor.button = choose button
-							Direction dir;
-							if (editor.v5 == 0.f) dir = Left;
-							else if (editor.v5 == 1.f) dir = Up;
-							else if (editor.v5 == 2.f) dir = Right;
-							else if (editor.v5 == 3.f) dir = Down;
+							printf("Button assigned!\n");
 							game->AddReverser(editor.v1, editor.v2, dir, button);
 							editor.placingStep = 0;
 						}
-						break;
 					}
-					case ATCameraZone:
-					{
-						// TODO
-						break;
-					}
-					}
+					break;
+				}
+				case ATCameraZone:
+				{
+					// TODO
+					break;
+				}
 				}
 			}
 
@@ -525,24 +578,22 @@ int main()
 				DrawText(winText, 640 - winTextWidth / 2, 320, 80, BLACK);
 				DrawText(winText, 643 - winTextWidth / 2, 323, 80, WHITE);
 			}
-			else if (state == EDITOR)
+
+			// Draw edits in progress
+			if (state == EDITOR)
 			{
-				Vector2 placingPos = GetScreenToWorld2D(GetMousePosition(), game->camera);
-				placingPos.x = ((int)(placingPos.x / 4.f)) * 4;
-				placingPos.y = ((int)(placingPos.y / 4.f)) * 4;
 				switch (editor.placingAsset)
 				{
 				case ATFloor:
 				{
 					if (editor.placingStep == 0)
-						DrawRectangle((int)placingPos.x - 12, (int)placingPos.y - 12, 24, 24, BLUE);
+						DrawRectangle((int)editor.placingPos.x - 12, (int)editor.placingPos.y - 12, 24, 24, BLUE);
 					else
 					{
-						Floor temp;
-						temp.start = editor.v1;
-						temp.end = placingPos;
+						Floor temp(editor.v1, editor.placingPos);
 						temp.Draw(texLine, texPaintBlue);
 					}
+					
 					break;
 				}
 				case ATCurve:
@@ -552,25 +603,68 @@ int main()
 					else if (editor.v5 == 1.f) ctype = NE;
 					else if (editor.v5 == 2.f) ctype = NW;
 					else if (editor.v5 == 3.f) ctype = SW;
-					Curve temp;
-					temp.pos = placingPos;
-					temp.type = ctype;
+
+					Curve temp(editor.placingPos, ctype);
 					temp.Draw(texCurveOutline, texCurveSolid);
+					
 					break;
 				}
 				case ATElevator:
 				{
+					if (editor.placingStep == 0)
+						DrawRectangle((int)editor.placingPos.x - 12, (int)editor.placingPos.y - 12, 24, 24, GREEN);
+					else
+					{
+						Elevator temp(editor.v1, editor.placingStep == 1 ? editor.placingPos : editor.v2, {}, {}, 0.5f, Button::None);
+						temp.Draw(texLine, texPaintLightGreen);
 
+						if (editor.placingStep == 2)
+							DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.placingPos.x, (int)editor.placingPos.y, GREEN);
+						else if (editor.placingStep == 3)
+						{
+							DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.v3.x, (int)editor.v3.y, GREEN);
+							DrawLine((int)editor.v2.x, (int)editor.v2.y, (int)editor.placingPos.x, (int)editor.placingPos.y, GREEN);
+						}
+						else if (editor.placingStep > 3)
+						{
+							DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.v3.x, (int)editor.v3.y, GREEN);
+							DrawLine((int)editor.v2.x, (int)editor.v2.y, (int)editor.v4.x, (int)editor.v4.y, GREEN);
+						}
+					}
 					break;
 				}
 				case ATDangerBlock:
 				{
+					if (editor.placingStep == 0)
+						DrawRectangle((int)editor.placingPos.x - 12, (int)editor.placingPos.y - 12, 24, 24, WHITE);
+					else
+					{
+						Vector2 botRight = editor.placingStep == 1 ? editor.placingPos : editor.v2;
+						Vector2 pos = Vector2Scale(Vector2Add(editor.v1, botRight), 0.5f);
+						Vector2 size = Vector2Subtract(botRight, editor.v1);
+						DangerBlock temp(pos, {}, size, Button::None);
+						temp.Draw(texLine, texPaintGray);
 
+						if (editor.placingStep > 1)
+						{
+							Vector2 pos2 = editor.placingStep == 2 ? editor.placingPos : editor.v3;
+							DrawLine((int)pos.x, (int)pos.y, (int)pos2.x, (int)pos2.y, WHITE);
+						}
+					}
 					break;
 				}
 				case ATReverser:
 				{
+					Direction dir;
+					if (editor.v5 == 0.f) dir = Left;
+					else if (editor.v5 == 1.f) dir = Up;
+					else if (editor.v5 == 2.f) dir = Right;
+					else if (editor.v5 == 3.f) dir = Down;
 
+					Reverser temp(editor.placingStep == 0 ? editor.placingPos : editor.v1, {}, dir, Button::None);
+					temp.Draw(texReverserBackEnabled, texReverserBackDisabled, texReverserOutline, texReverserArrows);
+					if (editor.placingStep == 1)
+						DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.placingPos.x, (int)editor.placingPos.y, GREEN);
 					break;
 				}
 				case ATCameraZone:

@@ -47,7 +47,7 @@ void Floor::Update(float dt, float wobbleRate)
 void Floor::Draw(Texture2D& lineTex, Texture2D& paintTex)
 {
 	DrawPaintLine(paintTex, { start.x, start.y }, { end.x, end.y });
-	Vector2 offsetDir = Vector2Normalize({ end.y - start.y, end.x - start.x });
+	Vector2 offsetDir = Vector2Normalize({ start.y - end.y, end.x - start.x });
 	Vector2 offsetPos = Vector2Scale(offsetDir, 12.f);
 	Vector2 offsetNeg = Vector2Scale(offsetDir, -12.f);
 	line1.Draw(lineTex, { start.x + offsetNeg.x, start.y + offsetNeg.y }, { end.x + offsetNeg.x, end.y + offsetNeg.y });
@@ -81,8 +81,11 @@ void Elevator::Draw(Texture2D& lineTex, Texture2D& paintTex)
 	Vector2 s = GetCurrentStart();
 	Vector2 e = GetCurrentEnd();
 	DrawPaintLine(paintTex, { s.x, s.y }, { e.x, e.y });
-	line1.Draw(lineTex, { s.x, s.y - 12.f }, { e.x, e.y - 12.f });
-	line2.Draw(lineTex, { s.x, s.y + 12.f }, { e.x, e.y + 12.f });
+	Vector2 offsetDir = Vector2Normalize({ s.y - e.y, e.x - s.x });
+	Vector2 offsetPos = Vector2Scale(offsetDir, 12.f);
+	Vector2 offsetNeg = Vector2Scale(offsetDir, -12.f);
+	line1.Draw(lineTex, { s.x + offsetNeg.x, s.y + offsetNeg.y }, { e.x + offsetNeg.x, e.y + offsetNeg.y });
+	line2.Draw(lineTex, { s.x + offsetPos.x, s.y + offsetPos.y }, { e.x + offsetPos.x, e.y + offsetPos.y });
 }
 
 DangerBlock::DangerBlock(Vector2 _pos1, Vector2 _pos2, Vector2 _dimensions, Button _button)
@@ -233,4 +236,35 @@ bool CameraZone::ContainsPoint(Vector2 point)
 		   point.x > pos.x - size.x / 2.f && 
 		   point.y > pos.y - size.y / 2.f && 
 		   point.y < pos.x - size.y / 2.f;
+}
+
+Button GetButtonFromKeyPressed()
+{
+	if (IsKeyPressed(KeyboardKey::KEY_A)) return Button::A;
+	if (IsKeyPressed(KeyboardKey::KEY_B)) return Button::B;
+	if (IsKeyPressed(KeyboardKey::KEY_C)) return Button::C;
+	if (IsKeyPressed(KeyboardKey::KEY_D)) return Button::D;
+	if (IsKeyPressed(KeyboardKey::KEY_E)) return Button::E;
+	if (IsKeyPressed(KeyboardKey::KEY_F)) return Button::F;
+	if (IsKeyPressed(KeyboardKey::KEY_G)) return Button::G;
+	if (IsKeyPressed(KeyboardKey::KEY_H)) return Button::H;
+	if (IsKeyPressed(KeyboardKey::KEY_I)) return Button::I;
+	if (IsKeyPressed(KeyboardKey::KEY_J)) return Button::J;
+	if (IsKeyPressed(KeyboardKey::KEY_K)) return Button::K;
+	if (IsKeyPressed(KeyboardKey::KEY_L)) return Button::L;
+	if (IsKeyPressed(KeyboardKey::KEY_M)) return Button::M;
+	if (IsKeyPressed(KeyboardKey::KEY_N)) return Button::N;
+	if (IsKeyPressed(KeyboardKey::KEY_O)) return Button::O;
+	if (IsKeyPressed(KeyboardKey::KEY_P)) return Button::P;
+	if (IsKeyPressed(KeyboardKey::KEY_Q)) return Button::Q;
+	if (IsKeyPressed(KeyboardKey::KEY_R)) return Button::R;
+	if (IsKeyPressed(KeyboardKey::KEY_S)) return Button::S;
+	if (IsKeyPressed(KeyboardKey::KEY_T)) return Button::T;
+	if (IsKeyPressed(KeyboardKey::KEY_U)) return Button::U;
+	if (IsKeyPressed(KeyboardKey::KEY_V)) return Button::V;
+	if (IsKeyPressed(KeyboardKey::KEY_W)) return Button::W;
+	if (IsKeyPressed(KeyboardKey::KEY_X)) return Button::X;
+	if (IsKeyPressed(KeyboardKey::KEY_Y)) return Button::Y;
+	if (IsKeyPressed(KeyboardKey::KEY_Z)) return Button::Z;
+	return Button::None;
 }

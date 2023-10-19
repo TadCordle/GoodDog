@@ -79,8 +79,8 @@ void DrawPaintLine(Texture2D& paintTex, Vector2 start, Vector2 end)
 	if (totalLength < 256.f)
 	{
 		Rectangle srcRect = { 0.f, hash_float((int)start.x) * 232.f, totalLength, 24.f };
-		Rectangle dstRect = { (start.x + end.x) / 2.f, (start.y + end.y) / 2.f, 256.f, 24.f };
-		Vector2 origin = { 128.f, 12.f };
+		Rectangle dstRect = { (start.x + end.x) / 2.f, (start.y + end.y) / 2.f, totalLength, 24.f };
+		Vector2 origin = { totalLength / 2.f, 12.f };
 		float angle = atan2f(end.y - start.y, end.x - start.x) * RAD2DEG;
 		DrawTexturePro(paintTex, srcRect, dstRect, origin, angle, WHITE);
 	}
