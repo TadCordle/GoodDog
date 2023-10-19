@@ -349,9 +349,9 @@ int main()
 			if (IsKeyPressed(KeyboardKey::KEY_KP_5)) editor.UpdatePlacing(ATReverser);
 			if (IsKeyPressed(KeyboardKey::KEY_KP_6)) editor.UpdatePlacing(ATCameraZone);
 
-			// If curve or reverser is selected, choose direction
 			if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_RIGHT))
 			{
+				// If curve or reverser is selected, choose direction
 				if (editor.placingAsset == ATCurve || (editor.placingAsset == ATReverser && editor.placingStep == 0))
 				{
 					editor.v5++;
@@ -360,7 +360,105 @@ int main()
 				}
 				else
 				{
-					// TODO: Remove whatever is under the mouse
+					// Right click removal
+
+					bool removedSomething = false;
+
+					auto IsMouseOverLine = [&](Vector2 start, Vector2 end)
+					{
+						Vector2 floorCenter = Vector2Lerp(start, end, 0.5f);
+						Vector2 floorRight = Vector2Normalize(Vector2Subtract(end, start));
+						Vector2 floorUp = { floorRight.y, -floorRight.x };
+						float mouseXToFloor = Vector2DotProduct(Vector2Subtract(editor.placingPos, floorCenter), floorRight);
+						float floorLength = Vector2DotProduct(Vector2Subtract(end, start), floorRight);
+						if (fabs(mouseXToFloor) < fabs(floorLength) / 2.f + 64.f)
+						{
+							Vector2 closestFloorPos = Vector2Lerp(start, end, mouseXToFloor / floorLength + 0.5f);
+							float dist = Vector2DotProduct(Vector2Subtract(editor.placingPos, closestFloorPos), floorUp);
+							return abs(dist) < 24.f;
+						}
+						return false;
+					};
+
+					auto IsMouseOverRectangle = [&](Vector2 pos, Vector2 size)
+					{
+						return editor.placingPos.x < pos.x + size.x / 2.f &&
+							   editor.placingPos.x > pos.x - size.x / 2.f &&
+							   editor.placingPos.y < pos.y + size.y / 2.f &&
+							   editor.placingPos.y > pos.y - size.y / 2.f;
+					};
+
+					for (int i = 0; i < game->floorsCount; i++)
+					{
+						if (IsMouseOverLine(game->floors[i].start, game->floors[i].end))
+						{
+							game->floors[i] = game->floors[game->floorsCount - 1];
+							game->floorsCount--;
+							removedSomething = true;
+							break;
+						}
+					}
+
+					if (!removedSomething)
+					for (int i = 0; i < game->curvesCount; i++)
+					{
+						if (IsMouseOverRectangle(game->curves[i].pos, { 128.f, 128.f }))
+						{
+							game->curves[i] = game->curves[game->curvesCount - 1];
+							game->curvesCount--;
+							removedSomething = true;
+							break;
+						}
+					}
+
+					if (!removedSomething)
+					for (int i = 0; i < game->elevatorsCount; i++)
+					{
+						if (IsMouseOverLine(game->elevators[i].start, game->elevators[i].end))
+						{
+							game->elevators[i] = game->elevators[game->elevatorsCount - 1];
+							game->elevatorsCount--;
+							removedSomething = true;
+							break;
+						}
+					}
+
+					if (!removedSomething)
+					for (int i = 0; i < game->dangerBlocksCount; i++)
+					{
+						if (IsMouseOverRectangle(game->dangerBlocks[i].pos1, game->dangerBlocks[i].dimensions))
+						{
+							game->dangerBlocks[i] = game->dangerBlocks[game->dangerBlocksCount - 1];
+							game->dangerBlocksCount--;
+							removedSomething = true;
+							break;
+						}
+					}
+
+					if (!removedSomething)
+					for (int i = 0; i < game->reversersCount; i++)
+					{
+						Vector2 dimensions = (game->reversers[i].dir == Left || game->reversers[i].dir == Right) ? Vector2{ 60.f, 220.f } : Vector2{ 220.f, 60.f };
+						if (IsMouseOverRectangle(game->reversers[i].pos1, dimensions))
+						{
+							game->reversers[i] = game->reversers[game->reversersCount - 1];
+							game->reversersCount--;
+							removedSomething = true;
+							break;
+						}
+					}
+
+					if (!removedSomething)
+					for (int i = 0; i < game->cameraZonesCount; i++)
+					{
+						if (game->cameraZones[i].ContainsPoint(editor.placingPos))
+						{
+							game->cameraZones[i] = game->cameraZones[game->cameraZonesCount - 1];
+							game->cameraZonesCount--;
+							removedSomething = true;
+							break;
+						}
+					}
 				}
 			}
 

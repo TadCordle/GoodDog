@@ -252,8 +252,8 @@ bool CameraZone::ContainsPoint(Vector2 point)
 {
 	return point.x < pos.x + size.x / 2.f && 
 		   point.x > pos.x - size.x / 2.f && 
-		   point.y > pos.y - size.y / 2.f && 
-		   point.y < pos.x - size.y / 2.f;
+		   point.y < pos.y + size.y / 2.f && 
+		   point.y > pos.y - size.y / 2.f;
 }
 
 Button GetButtonFromKeyPressed()
