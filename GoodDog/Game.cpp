@@ -48,6 +48,132 @@ void Game::AddCameraZone(Vector2 pos, Vector2 size, Camera2D params)
 		printf("Camera zone limit hit!\n");
 }
 
+void Game::Serialize(const char* path)
+{
+	FILE* file;
+	fopen_s(&file, path, "w");
+	if (!file)
+	{
+		printf("Couldn't open level.txt!\n");
+		return;
+	}
+
+	for (int i = 0; i < floorsCount; i++)
+	{
+		Floor& floor = floors[i];
+		fprintf(file, "%d\n", (int)AssetType::ATFloor);
+		fprintf(file, "%f %f %f %f\n", floor.start.x, floor.start.y, floor.end.x, floor.end.y);
+	}
+
+	for (int i = 0; i < curvesCount; i++)
+	{
+		Curve& curve = curves[i];
+		fprintf(file, "%d\n", (int)AssetType::ATCurve);
+		fprintf(file, "%f %f %d\n", curve.pos.x, curve.pos.y, (int)curve.type);
+	}
+
+	for (int i = 0; i < elevatorsCount; i++)
+	{
+		Elevator& elevator = elevators[i];
+		fprintf(file, "%d\n", (int)AssetType::ATElevator);
+		fprintf(file, "%f %f %f %f %f %f %f %f %f %d\n", elevator.start.x, elevator.start.y, elevator.end.x, elevator.end.y, elevator.newStart.x, elevator.newStart.y, elevator.newEnd.x, elevator.newEnd.y, elevator.travelTime, (int)elevator.button);
+	}
+
+	for (int i = 0; i < dangerBlocksCount; i++)
+	{
+		DangerBlock& block = dangerBlocks[i];
+		fprintf(file, "%d\n", (int)AssetType::ATDangerBlock);
+		fprintf(file, "%f %f %f %f %f %f %d\n", block.pos1.x, block.pos1.y, block.pos2.x, block.pos2.y, block.dimensions.x, block.dimensions.y, (int)block.button);
+	}
+
+	for (int i = 0; i < reversersCount; i++)
+	{
+		Reverser& reverser = reversers[i];
+		fprintf(file, "%d\n", (int)AssetType::ATReverser);
+		fprintf(file, "%f %f %f %f %d %d\n", reverser.pos1.x, reverser.pos1.y, reverser.pos2.x, reverser.pos2.y, (int)reverser.dir, (int)reverser.button);
+	}
+
+	for (int i = 0; i < cameraZonesCount; i++)
+	{
+		CameraZone& zone = cameraZones[i];
+		fprintf(file, "%d\n", (int)AssetType::ATCameraZone);
+		fprintf(file, "%f %f %f %f %f %f %f\n", zone.pos.x, zone.pos.y, zone.size.x, zone.size.y, zone.params.offset.x, zone.params.offset.y, zone.params.zoom);
+	}
+
+	fflush(file);
+	fclose(file);
+	printf("Level saved!\n");
+}
+
+void Game::Deserialize(const char* path)
+{
+	FILE* file;
+	fopen_s(&file, path, "r");
+	if (!file)
+	{
+		printf("Couldn't find level.txt!\n");
+		return;
+	}
+
+	while (!feof(file))
+	{
+		int type;
+		int _ = fscanf_s(file, "%d\n", &type);
+		switch ((AssetType)type)
+		{
+		case ATFloor:
+		{
+			Vector2 start, end;
+			_ = fscanf_s(file, "%f %f %f %f\n", &start.x, &start.y, &end.x, &end.y);
+			AddFloor(start, end);
+			break;
+		}
+		case ATCurve:
+		{
+			Vector2 pos;
+			int curveType;
+			_ = fscanf_s(file, "%f %f %d\n", &pos.x, &pos.y, &curveType);
+			AddCurve(pos, (CurveType)curveType);
+			break;
+		}
+		case ATElevator:
+		{
+			Vector2 start, end, newStart, newEnd;
+			float travelTime;
+			int button;
+			_ = fscanf_s(file, "%f %f %f %f %f %f %f %f %f %d\n", &start.x, &start.y, &end.x, &end.y, &newStart.x, &newStart.y, &newEnd.x, &newEnd.y, &travelTime, &button);
+			AddElevator(start, end, newStart, newEnd, travelTime, (Button)button);
+			break;
+		}
+		case ATDangerBlock:
+		{
+			Vector2 pos1, pos2, size;
+			int button;
+			_ = fscanf_s(file, "%f %f %f %f %f %f %d\n", &pos1.x, &pos1.y, &pos2.x, &pos2.y, &size.x, &size.y, &button);
+			AddDangerBlock(pos1, pos2, size, (Button)button);
+			break;
+		}
+		case ATReverser:
+		{
+			Vector2 pos1, pos2;
+			int dir, button;
+			_ = fscanf_s(file, "%f %f %f %f %d %d\n", &pos1.x, &pos1.y, &pos2.x, &pos2.y, &dir, &button);
+			AddReverser(pos1, pos2, (Direction)dir, (Button)button);
+			break;
+		}
+		case ATCameraZone:
+		{
+			Vector2 pos, size;
+			Camera2D params = { 0 };
+			_ = fscanf_s(file, "%f %f %f %f %f %f %f\n", &pos.x, &pos.y, &size.x, &size.y, &params.offset.x, &params.offset.y, &params.zoom);
+			AddCameraZone(pos, size, params);
+			break;
+		}
+		}
+	}
+	fclose(file);
+}
+
 Floor::Floor(Vector2 _start, Vector2 _end)
 {
 	start = _start;

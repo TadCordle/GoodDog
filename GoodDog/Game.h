@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <stdio.h>
 #include "raylib.h"
 #include "WobblyRender.h"
 
@@ -187,6 +188,9 @@ struct Game
 	void AddDangerBlock(Vector2 pos1, Vector2 pos2, Vector2 size, Button button);
 	void AddReverser(Vector2 pos1, Vector2 pos2, Direction dir, Button button);
 	void AddCameraZone(Vector2 pos, Vector2 size, Camera2D params);
+
+	void Serialize(const char* path);
+	void Deserialize(const char* path);
 };
 
 enum AssetType
