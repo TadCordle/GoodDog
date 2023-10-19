@@ -4,7 +4,6 @@ int main()
 {
 	InitWindow(1280, 720, "Good Dog");
 	SetTargetFPS(120);
-	//ToggleFullscreen();
 
 	InitAudioDevice();
 
@@ -37,6 +36,7 @@ int main()
 	WobblyTexture dogOutline, dogBack;
 
 	Font font = LoadFontEx("resources/GamjaFlower-Regular.ttf", 80, 0, 0);
+	SetTextureFilter(font.texture, TEXTURE_FILTER_POINT);
 	const char* loseText = "Bad dog :(";
 	const char* winText = "Good dog :)";
 	int loseTextWidth = MeasureTextEx(font, loseText, 80, 0).x;
@@ -117,6 +117,10 @@ int main()
 			for (int i = 0; i < game->reversersCount; i++)
 				game->reversers[i].enabled = 1.f;
 		}
+
+		// Toggle fullscreen
+		if (IsKeyPressed(KeyboardKey::KEY_F11))
+			ToggleFullscreen();
 
 		// Update entities
 		if (state != EDITOR)
