@@ -97,7 +97,7 @@ void Game::Serialize(const char* path)
 	{
 		CameraZone& zone = cameraZones[i];
 		fprintf(file, "%d\n", (int)AssetType::ATCameraZone);
-		fprintf(file, "%f %f %f %f %f %f %f\n", zone.pos.x, zone.pos.y, zone.size.x, zone.size.y, zone.params.offset.x, zone.params.offset.y, zone.params.zoom);
+		fprintf(file, "%f %f %f %f %f %f %f %f %f\n", zone.pos.x, zone.pos.y, zone.size.x, zone.size.y, zone.params.offset.x, zone.params.offset.y, zone.params.target.x, zone.params.target.y, zone.params.zoom);
 	}
 
 	fflush(file);
@@ -165,7 +165,7 @@ void Game::Deserialize(const char* path)
 		{
 			Vector2 pos, size;
 			Camera2D params = { 0 };
-			_ = fscanf_s(file, "%f %f %f %f %f %f %f\n", &pos.x, &pos.y, &size.x, &size.y, &params.offset.x, &params.offset.y, &params.zoom);
+			_ = fscanf_s(file, "%f %f %f %f %f %f %f %f %f\n", &pos.x, &pos.y, &size.x, &size.y, &params.offset.x, &params.offset.y, &params.target.x, &params.target.y, &params.zoom);
 			AddCameraZone(pos, size, params);
 			break;
 		}

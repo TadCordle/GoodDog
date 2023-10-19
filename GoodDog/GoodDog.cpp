@@ -41,7 +41,11 @@ int main()
 	int loseTextWidth = MeasureText(loseText, 80);
 	int winTextWidth = MeasureText(winText, 80);
 
+#if 0
 	GameState state = EDITOR;
+#else
+	GameState state = CUTSCENE;
+#endif
 	EditorState editor;
 
 	Game* game = new Game();
@@ -95,6 +99,17 @@ int main()
 
 		Rectangle dogHitBox = { pos.x - 48.f, pos.y - 48.f, 96.f, 96.f };
 
+		// Update camera when you hit a camera zone
+		if (state != EDITOR)
+		{
+			for (int i = 0; i < game->cameraZonesCount; i++)
+			{
+				CameraZone& cameraZone = game->cameraZones[i];
+				if (cameraZone.ContainsPoint(pos))
+					game->camera = cameraZone.params;
+			}
+		}
+
 		switch (state)
 		{
 		case CUTSCENE:
@@ -147,7 +162,7 @@ int main()
 				dogUp = { sinf(dogAngle * DEG2RAD), -cosf(dogAngle * DEG2RAD) };
 				dogRight = Vector2Scale({ cosf(dogAngle * DEG2RAD), sinf(dogAngle * DEG2RAD) }, dogFlipped ? -1.f : 1.f);
 				
-				pos = Vector2Add(pos, Vector2Scale(dogRight, 280.f * dt));
+				pos = Vector2Add(pos, Vector2Scale(dogRight, 290.f * dt));
 
 				// Dog hopping
 				hopOffset += (frame == 2 ? -100.f : 100.f) * dt;
@@ -160,14 +175,6 @@ int main()
 				// TODO: Use GetMusicTimePlayed(music) to ensure we're synced up, in case someone drags the window and pauses the game or something
 			}
 
-			// Update camera when you hit a camera zone
-			for (int i = 0; i < game->cameraZonesCount; i++)
-			{
-				CameraZone& cameraZone = game->cameraZones[i];
-				if (cameraZone.ContainsPoint(pos))
-					game->camera = cameraZone.params;
-			}
-			
 			// Check if walking over curve; initiate rotation if so
 			for (int i = 0; i < game->curvesCount; i++)
 			{
