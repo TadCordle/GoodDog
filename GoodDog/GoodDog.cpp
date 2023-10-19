@@ -864,10 +864,13 @@ int main()
 
 					Reverser temp(editor.placingStep == 0 ? editor.placingPos : editor.v1, {}, dir, Button::None);
 					temp.Draw(texReverserBackEnabled, texReverserBackDisabled, texReverserOutline, texReverserArrows);
-					if (editor.placingStep >= 1)
+					if (editor.placingStep == 1)
 						DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.placingPos.x, (int)editor.placingPos.y, GREEN);
 					if (editor.placingStep == 2)
+					{
+						DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.v2.x, (int)editor.v2.y, GREEN);
 						DrawButtonText(font, editor.v1, (int)Button::QMark);
+					}
 					break;
 				}
 				case ATCameraZone:
