@@ -350,13 +350,17 @@ int main()
 			if (IsKeyPressed(KeyboardKey::KEY_KP_6)) editor.UpdatePlacing(ATCameraZone);
 
 			// If curve or reverser is selected, choose direction
-			if (editor.placingAsset == ATCurve || editor.placingAsset == ATReverser)
+			if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_RIGHT))
 			{
-				if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_RIGHT))
+				if (editor.placingAsset == ATCurve || (editor.placingAsset == ATReverser && editor.placingStep == 0))
 				{
 					editor.v5++;
 					if (editor.v5 > 3.f)
 						editor.v5 = 0.f;
+				}
+				else
+				{
+					// TODO: Remove whatever is under the mouse
 				}
 			}
 
@@ -431,7 +435,12 @@ int main()
 					else if (editor.placingStep == 3)
 					{
 						// Elevator end move position
-						if (IsKeyDown(KeyboardKey::KEY_LEFT_SHIFT))  SnapPlacingPos(editor.v2);
+						if (IsKeyDown(KeyboardKey::KEY_LEFT_SHIFT))
+						{
+							SnapPlacingPos(editor.v2);
+							if (IsKeyDown(KeyboardKey::KEY_LEFT_CONTROL)) // Align with first movement point
+								SnapPlacingPos(editor.v3);
+						}
 						if (clicked)
 						{
 							editor.v4 = editor.placingPos;
