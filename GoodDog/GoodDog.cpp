@@ -54,6 +54,7 @@ int main()
 	game->camera.rotation = 0.f;
 	game->camera.zoom = 1.f;
 	game->camera.target = { 0.f, 0.f };
+	Camera2D prevCamera = game->camera;
 
 	// Gameplay state
 	Vector2 pos = game->dogStartingPos;
@@ -89,11 +90,13 @@ int main()
 			if (state == EDITOR)
 			{
 				state = prevState;
+				game->camera = prevCamera;
 				if (state == GOING)
 					PlayMusicStream(music);
 			}
 			else
 			{
+				prevCamera = game->camera;
 				prevState = state;
 				state = EDITOR;
 				PauseMusicStream(music);
