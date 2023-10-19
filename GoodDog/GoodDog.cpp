@@ -165,9 +165,9 @@ int main()
 				pos = Vector2Add(pos, Vector2Scale(dogRight, 290.f * dt));
 
 				// Dog hopping
-				hopOffset += (frame == 2 ? -100.f : 100.f) * dt;
+				hopOffset += (frame == 2 ? -120.f : 120.f) * dt;
 				if (hopOffset > 0.f) hopOffset = 0.f;
-				if (hopOffset < -20.f) hopOffset = -20.f;
+				if (hopOffset < -30.f) hopOffset = -30.f;
 
 				hopTimer += dt;
 				double timeWithinBeat = remainder(hopTimer, HOP_TIMER);

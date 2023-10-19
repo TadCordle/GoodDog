@@ -247,7 +247,7 @@ void DangerBlock::Update(float dt, float wobbleRate)
 
 	currentTravelTime += dt * (IsKeyDown((int)button) ? 1 : -1);
 	if (currentTravelTime < 0.f)  currentTravelTime = 0.f;
-	if (currentTravelTime > 0.4f) currentTravelTime = 0.4f;
+	if (currentTravelTime > 0.1f) currentTravelTime = 0.1f;
 }
 
 void DangerBlock::Draw(Texture2D& lineTex, Texture2D& paintTex)
