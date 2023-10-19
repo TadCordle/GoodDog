@@ -48,6 +48,14 @@ void Game::AddCameraZone(Vector2 pos, Vector2 size, Camera2D params)
 		printf("Camera zone limit hit!\n");
 }
 
+void Game::AddPrompt(Vector2 pos, Button button)
+{
+	if (promptsCount < 256)
+		prompts[promptsCount++] = Prompt(pos, button);
+	else
+		printf("Prompt limit hit!\n");
+}
+
 void Game::Serialize(const char* path)
 {
 	FILE* file;
@@ -98,6 +106,13 @@ void Game::Serialize(const char* path)
 		CameraZone& zone = cameraZones[i];
 		fprintf(file, "%d\n", (int)AssetType::ATCameraZone);
 		fprintf(file, "%f %f %f %f %f %f %f %f %f\n", zone.pos.x, zone.pos.y, zone.size.x, zone.size.y, zone.params.offset.x, zone.params.offset.y, zone.params.target.x, zone.params.target.y, zone.params.zoom);
+	}
+
+	for (int i = 0; i < promptsCount; i++)
+	{
+		Prompt& prompt = prompts[i];
+		fprintf(file, "%d\n", (int)AssetType::ATPrompt);
+		fprintf(file, "%f %f %d\n", prompt.pos.x, prompt.pos.y, (int)prompt.button);
 	}
 
 	fflush(file);
@@ -167,6 +182,14 @@ void Game::Deserialize(const char* path)
 			Camera2D params = { 0 };
 			_ = fscanf_s(file, "%f %f %f %f %f %f %f %f %f\n", &pos.x, &pos.y, &size.x, &size.y, &params.offset.x, &params.offset.y, &params.target.x, &params.target.y, &params.zoom);
 			AddCameraZone(pos, size, params);
+			break;
+		}
+		case ATPrompt:
+		{
+			Vector2 pos;
+			int button;
+			_ = fscanf_s(file, "%f %f %d\n", &pos.x, &pos.y, &button);
+			AddPrompt(pos, (Button)button);
 			break;
 		}
 		}
@@ -381,6 +404,17 @@ bool CameraZone::ContainsPoint(Vector2 point)
 		   point.x > pos.x - size.x / 2.f && 
 		   point.y < pos.y + size.y / 2.f && 
 		   point.y > pos.y - size.y / 2.f;
+}
+
+Prompt::Prompt(Vector2 _pos, Button _button)
+{
+	pos = _pos;
+	button = _button;
+}
+
+void Prompt::Draw(Font& font)
+{
+	DrawButtonText(font, pos, (int)button);
 }
 
 Button GetButtonFromKeyPressed()

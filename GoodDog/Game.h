@@ -12,6 +12,7 @@
 enum Button {
 	None = 0,
 	Cancel = 1,
+	QMark = 2,
 	A = KEY_A,
 	B = KEY_B,
 	C = KEY_C,
@@ -153,6 +154,16 @@ struct CameraZone
 	bool ContainsPoint(Vector2 _point);
 };
 
+struct Prompt
+{
+	Vector2 pos{};
+	Button button;
+
+	Prompt() {}
+	Prompt(Vector2 _pos, Button _button);
+	void Draw(Font& font);
+};
+
 enum GameState
 {
 	CUTSCENE,
@@ -170,6 +181,7 @@ struct Game
 	Elevator elevators[256] = {};
 	Reverser reversers[256] = {};
 	CameraZone cameraZones[256] = {};
+	Prompt prompts[256] = {};
 
 	int floorsCount = 0;
 	int reversersCount = 0;
@@ -177,6 +189,7 @@ struct Game
 	int dangerBlocksCount = 0;
 	int curvesCount = 0;
 	int cameraZonesCount = 0;
+	int promptsCount = 0;
 
 	Camera2D camera = {};
 
@@ -189,6 +202,7 @@ struct Game
 	void AddDangerBlock(Vector2 pos1, Vector2 pos2, Vector2 size, Button button);
 	void AddReverser(Vector2 pos1, Vector2 pos2, Direction dir, Button button);
 	void AddCameraZone(Vector2 pos, Vector2 size, Camera2D params);
+	void AddPrompt(Vector2 pos, Button button);
 
 	void Serialize(const char* path);
 	void Deserialize(const char* path);
@@ -203,10 +217,10 @@ enum AssetType
 	ATDangerBlock,
 	ATReverser,
 	ATCameraZone,
+	ATPrompt,
 
 	// Haven't done yet
 	ATCheckpoint,
-	ATTexture,
 	ATShades,
 	ATHat,
 	ATBall

@@ -381,13 +381,14 @@ int main()
 			};
 
 			// Select item
-			if (IsKeyPressed(KeyboardKey::KEY_KP_0)) editor.UpdatePlacing(ATNone);
-			if (IsKeyPressed(KeyboardKey::KEY_KP_1)) editor.UpdatePlacing(ATFloor);
-			if (IsKeyPressed(KeyboardKey::KEY_KP_2)) editor.UpdatePlacing(ATCurve);
-			if (IsKeyPressed(KeyboardKey::KEY_KP_3)) editor.UpdatePlacing(ATElevator);
-			if (IsKeyPressed(KeyboardKey::KEY_KP_4)) editor.UpdatePlacing(ATDangerBlock);
-			if (IsKeyPressed(KeyboardKey::KEY_KP_5)) editor.UpdatePlacing(ATReverser);
-			if (IsKeyPressed(KeyboardKey::KEY_KP_6)) editor.UpdatePlacing(ATCameraZone);
+			if (IsKeyPressed(KeyboardKey::KEY_ZERO))   editor.UpdatePlacing(ATNone);
+			if (IsKeyPressed(KeyboardKey::KEY_ONE))    editor.UpdatePlacing(ATFloor);
+			if (IsKeyPressed(KeyboardKey::KEY_TWO))    editor.UpdatePlacing(ATCurve);
+			if (IsKeyPressed(KeyboardKey::KEY_THREE))  editor.UpdatePlacing(ATElevator);
+			if (IsKeyPressed(KeyboardKey::KEY_FOUR))   editor.UpdatePlacing(ATDangerBlock);
+			if (IsKeyPressed(KeyboardKey::KEY_FIVE))   editor.UpdatePlacing(ATReverser);
+			if (IsKeyPressed(KeyboardKey::KEY_SIX))    editor.UpdatePlacing(ATCameraZone);
+			if (IsKeyPressed(KeyboardKey::KEY_SEVEN))  editor.UpdatePlacing(ATPrompt);
 
 			if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_RIGHT))
 			{
@@ -483,6 +484,18 @@ int main()
 						{
 							game->reversers[i] = game->reversers[game->reversersCount - 1];
 							game->reversersCount--;
+							removedSomething = true;
+							break;
+						}
+					}
+
+					if (!removedSomething)
+					for (int i = 0; i < game->promptsCount; i++)
+					{
+						if (IsMouseOverRectangle(game->prompts[i].pos, { 64.f, 64.f }))
+						{
+							game->prompts[i] = game->prompts[game->promptsCount - 1];
+							game->promptsCount--;
 							removedSomething = true;
 							break;
 						}
@@ -701,6 +714,27 @@ int main()
 					}
 					break;
 				}
+				case ATPrompt:
+				{
+					if (editor.placingStep == 0 && clicked)
+					{
+						// Position
+						editor.v1 = editor.placingPos;
+						editor.placingStep++;
+					}
+					else if (editor.placingStep == 1)
+					{
+						// Button
+						Button button = GetButtonFromKeyPressed();
+						if (button != Button::None && button != Button::Cancel)
+						{
+							printf("Button assigned!\n");
+							game->AddPrompt(editor.v1, button);
+							editor.placingStep = 0;
+						}
+					}
+					break;
+				}
 				}
 			}
 
@@ -728,6 +762,8 @@ int main()
 				game->elevators[i].Draw(texLine, texPaintLightGreen);
 			for (int i = 0; i < game->reversersCount; i++)
 				game->reversers[i].Draw(texReverserBackEnabled, texReverserBackDisabled, texReverserOutline, texReverserArrows);
+			for (int i = 0; i < game->promptsCount; i++)
+				game->prompts[i].Draw(font);
 
 			Vector2 offsetPos = Vector2Add(pos, Vector2Scale(dogUp, -hopOffset));
 			Vector2 drawPos = Vector2Add(offsetPos, Vector2Scale(dogRight, dogFlipped ? -12.f : 12.f));
@@ -793,6 +829,7 @@ int main()
 						{
 							DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.v3.x, (int)editor.v3.y, GREEN);
 							DrawLine((int)editor.v2.x, (int)editor.v2.y, (int)editor.v4.x, (int)editor.v4.y, GREEN);
+							DrawButtonText(font, Vector2Scale(Vector2Add(editor.v1, editor.v2), 0.5f), (int)Button::QMark);
 						}
 					}
 					break;
@@ -806,7 +843,7 @@ int main()
 						Vector2 botRight = editor.placingStep == 1 ? editor.placingPos : editor.v2;
 						Vector2 pos = Vector2Scale(Vector2Add(editor.v1, botRight), 0.5f);
 						Vector2 size = Vector2Subtract(botRight, editor.v1);
-						DangerBlock temp(pos, {}, size, Button::None);
+						DangerBlock temp(pos, {}, size, editor.placingStep == 3 ? Button::QMark : Button::None);
 						temp.Draw(texLine, texPaintGray, font);
 
 						if (editor.placingStep > 1)
@@ -827,8 +864,10 @@ int main()
 
 					Reverser temp(editor.placingStep == 0 ? editor.placingPos : editor.v1, {}, dir, Button::None);
 					temp.Draw(texReverserBackEnabled, texReverserBackDisabled, texReverserOutline, texReverserArrows);
-					if (editor.placingStep == 1)
+					if (editor.placingStep >= 1)
 						DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.placingPos.x, (int)editor.placingPos.y, GREEN);
+					if (editor.placingStep == 2)
+						DrawButtonText(font, editor.v1, (int)Button::QMark);
 					break;
 				}
 				case ATCameraZone:
@@ -843,6 +882,13 @@ int main()
 						DrawRectangleLinesEx(zoneRect, 2.f / game->camera.zoom, SKYBLUE);
 					}
 					break;
+				}
+				case ATPrompt:
+				{
+					if (editor.placingStep == 0)
+						DrawRectangle((int)editor.placingPos.x - 32, (int)editor.placingPos.y - 32, 64, 64, WHITE);
+					else
+						DrawButtonText(font, editor.v1, (int)Button::QMark);
 				}
 				}
 			}
