@@ -135,3 +135,15 @@ void WobblyRectangle::Draw(Texture2D& lineTex, Texture2D& paintTex, Vector2 topL
 	left.Draw(lineTex, topLeft, { topLeft.x, botRight.y });
 	right.Draw(lineTex, { botRight.x, topLeft.y }, botRight);
 }
+
+void DrawButtonText(Font& font, Vector2 position, int button)
+{
+	StringAndColor sc = stringsAndColors[button - 65];
+	Color brightened = ColorBrightness(sc.color, 0.5f);
+	Vector2 fontSize = MeasureTextEx(font, sc.str, 80, 0);
+	DrawTextEx(font, sc.str, Vector2Add(Vector2Subtract(position, Vector2Scale(fontSize, 0.5f)), { 3.f, 3.f }), 80, 0, BLACK);
+	DrawTextEx(font, sc.str, Vector2Add(Vector2Subtract(position, Vector2Scale(fontSize, 0.5f)), { -3.f, 3.f }), 80, 0, BLACK);
+	DrawTextEx(font, sc.str, Vector2Add(Vector2Subtract(position, Vector2Scale(fontSize, 0.5f)), { 3.f, -3.f }), 80, 0, BLACK);
+	DrawTextEx(font, sc.str, Vector2Add(Vector2Subtract(position, Vector2Scale(fontSize, 0.5f)), { -3.f, -3.f }), 80, 0, BLACK);
+	DrawTextEx(font, sc.str, Vector2Subtract(position, Vector2Scale(fontSize, 0.5f)), 80, 0, brightened);
+}

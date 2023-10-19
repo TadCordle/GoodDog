@@ -39,8 +39,8 @@ int main()
 	SetTextureFilter(font.texture, TEXTURE_FILTER_POINT);
 	const char* loseText = "Bad dog :(";
 	const char* winText = "Good dog :)";
-	int loseTextWidth = MeasureTextEx(font, loseText, 80, 0).x;
-	int winTextWidth = MeasureTextEx(font, winText, 80, 0).x;
+	float loseTextWidth = MeasureTextEx(font, loseText, 80, 0).x;
+	float winTextWidth = MeasureTextEx(font, winText, 80, 0).x;
 
 	GameState state = CUTSCENE;
 	GameState prevState = CUTSCENE;
@@ -716,7 +716,7 @@ int main()
 			BeginMode2D(game->camera);
 
 			for (int i = 0; i < game->dangerBlocksCount; i++)
-				game->dangerBlocks[i].Draw(texLine, texPaintGray);
+				game->dangerBlocks[i].Draw(texLine, texPaintGray, font);
 			for (int i = 0; i < game->curvesCount; i++)
 				game->curves[i].Draw(texCurveOutline, texCurveSolid);
 			for (int i = 0; i < game->floorsCount; i++)
@@ -804,7 +804,7 @@ int main()
 						Vector2 pos = Vector2Scale(Vector2Add(editor.v1, botRight), 0.5f);
 						Vector2 size = Vector2Subtract(botRight, editor.v1);
 						DangerBlock temp(pos, {}, size, Button::None);
-						temp.Draw(texLine, texPaintGray);
+						temp.Draw(texLine, texPaintGray, font);
 
 						if (editor.placingStep > 1)
 						{
@@ -848,15 +848,13 @@ int main()
 
 			if (state == LOSE)
 			{
-				// TODO: Wobble!
 				DrawTextEx(font, loseText, { 640.f - loseTextWidth / 2, 320.f }, 80, 0, BLACK);
 				DrawTextEx(font, loseText, { 643.f - loseTextWidth / 2, 323.f }, 80, 0, WHITE);
 			}
 			else if (state == WIN)
 			{
-				// TODO: Wobble
-				DrawText(winText, 640 - winTextWidth / 2, 320, 80, BLACK);
-				DrawText(winText, 643 - winTextWidth / 2, 323, 80, WHITE);
+				DrawTextEx(font, winText, { 640.f - winTextWidth / 2, 320.f }, 80, 0, BLACK);
+				DrawTextEx(font, winText, { 643.f - winTextWidth / 2, 323.f }, 80, 0, WHITE);
 			}
 
 			//DrawFPS(10, 10);

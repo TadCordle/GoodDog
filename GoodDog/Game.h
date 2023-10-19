@@ -11,32 +11,33 @@
 
 enum Button {
 	None = 0,
+	Cancel = 1,
 	A = KEY_A,
-	B = KEY_B, 
-	C = KEY_C, 
-	D = KEY_D, 
-	E = KEY_E, 
-	F = KEY_F, 
-	G = KEY_G, 
-	H = KEY_H, 
-	I = KEY_I, 
-	J = KEY_J, 
-	K = KEY_K, 
-	L = KEY_L, 
-	M = KEY_M, 
-	N = KEY_N, 
-	O = KEY_O, 
-	P = KEY_P, 
-	Q = KEY_Q, 
-	R = KEY_R, 
-	S = KEY_S, 
-	T = KEY_T, 
-	U = KEY_U, 
-	V = KEY_V, 
-	W = KEY_W, 
-	X = KEY_X, 
-	Y = KEY_Y, 
-	Z = KEY_Z 
+	B = KEY_B,
+	C = KEY_C,
+	D = KEY_D,
+	E = KEY_E,
+	F = KEY_F,
+	G = KEY_G,
+	H = KEY_H,
+	I = KEY_I,
+	J = KEY_J,
+	K = KEY_K,
+	L = KEY_L,
+	M = KEY_M,
+	N = KEY_N,
+	O = KEY_O,
+	P = KEY_P,
+	Q = KEY_Q,
+	R = KEY_R,
+	S = KEY_S,
+	T = KEY_T,
+	U = KEY_U,
+	V = KEY_V,
+	W = KEY_W,
+	X = KEY_X,
+	Y = KEY_Y,
+	Z = KEY_Z
 };
 
 Button GetButtonFromKeyPressed();
@@ -97,7 +98,7 @@ struct DangerBlock
 	DangerBlock() {}
 	DangerBlock(Vector2 _pos1, Vector2 _pos2, Vector2 _dimensions, Button _button);
 	void Update(float dt, float wobbleRate);
-	void Draw(Texture2D& lineTex, Texture2D& paintTex);
+	void Draw(Texture2D& lineTex, Texture2D& paintTex, Font& font);
 
 	inline Vector2 GetCurrentPos() { float t = currentTravelTime / 0.2f; return Vector2Lerp(pos1, pos2, t); }
 };

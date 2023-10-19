@@ -6,6 +6,41 @@
 #include <stdio.h>
 #include <stdint.h>
 
+struct StringAndColor
+{
+	Color color;
+	const char* str;
+};
+
+static StringAndColor stringsAndColors[26] = {
+	{ YELLOW,  "A" },
+	{ ORANGE,  "B" },
+	{ RED,     "C" },
+	{ GREEN,   "D" },
+	{ SKYBLUE, "E" },
+	{ BLUE,    "F" },
+	{ PURPLE,  "G" },
+	{ WHITE,   "H" },
+	{ MAGENTA, "I" },
+	{ RED,     "J" },
+	{ ORANGE,  "K" },
+	{ YELLOW,  "L" },
+	{ GREEN,   "M" },
+	{ SKYBLUE, "N" },
+	{ BLUE,    "O" },
+	{ PURPLE,  "P" },
+	{ WHITE,   "Q" },
+	{ MAGENTA, "R" },
+	{ RED,     "S" },
+	{ ORANGE,  "T" },
+	{ YELLOW,  "U" },
+	{ GREEN,   "V" },
+	{ SKYBLUE, "W" },
+	{ BLUE,    "X" },
+	{ PURPLE,  "Y" },
+	{ WHITE,   "Z" },
+};
+
 struct WobblyTexture
 {
 	float wobbleTime = 0.f;
@@ -35,3 +70,4 @@ struct WobblyRectangle
 };
 
 void DrawPaintLine(Texture2D& paintTex, Vector2 start, Vector2 end);
+void DrawButtonText(Font& font, Vector2 position, int button);

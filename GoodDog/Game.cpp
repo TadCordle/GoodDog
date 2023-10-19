@@ -250,13 +250,14 @@ void DangerBlock::Update(float dt, float wobbleRate)
 	if (currentTravelTime > 0.2f) currentTravelTime = 0.2f;
 }
 
-void DangerBlock::Draw(Texture2D& lineTex, Texture2D& paintTex)
+void DangerBlock::Draw(Texture2D& lineTex, Texture2D& paintTex, Font& font)
 {
 	Vector2 p = GetCurrentPos();
 	Vector2 topLeft  = { p.x - dimensions.x / 2.f, p.y - dimensions.y / 2.f };
 	Vector2 botRight = { p.x + dimensions.x / 2.f, p.y + dimensions.y / 2.f };
 	wobblyRectangle.Draw(lineTex, paintTex, topLeft, botRight);
-	// TODO: Draw prompt
+	if (button != Button::None && button != Button::Cancel)
+		DrawButtonText(font, p, (int)button);
 }
 
 Reverser::Reverser(Vector2 _pos1, Vector2 _pos2, Direction _dir, Button _button)
@@ -384,6 +385,7 @@ bool CameraZone::ContainsPoint(Vector2 point)
 
 Button GetButtonFromKeyPressed()
 {
+	if (IsKeyPressed(KeyboardKey::KEY_BACKSPACE)) return Button::Cancel;
 	if (IsKeyPressed(KeyboardKey::KEY_A)) return Button::A;
 	if (IsKeyPressed(KeyboardKey::KEY_B)) return Button::B;
 	if (IsKeyPressed(KeyboardKey::KEY_C)) return Button::C;
