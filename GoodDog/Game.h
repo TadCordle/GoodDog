@@ -99,7 +99,7 @@ struct DangerBlock
 	void Update(float dt, float wobbleRate);
 	void Draw(Texture2D& lineTex, Texture2D& paintTex);
 
-	inline Vector2 GetCurrentPos() { float t = currentTravelTime / 0.1f; return Vector2Lerp(pos1, pos2, t); }
+	inline Vector2 GetCurrentPos() { float t = currentTravelTime / 0.2f; return Vector2Lerp(pos1, pos2, t); }
 };
 
 enum Direction
@@ -125,7 +125,7 @@ struct Reverser
 	void Update(float dt, float wobbleRate);
 	void Draw(Texture2D& texBackEnabled, Texture2D& texBackDisabled, Texture2D& texOutline, Texture2D& texArrows);
 
-	inline Vector2 GetCurrentPos() { float t = currentTravelTime / 0.4f; return Vector2Lerp(pos1, pos2, t); }
+	inline Vector2 GetCurrentPos() { float t = currentTravelTime / 0.2f; return Vector2Lerp(pos1, pos2, t); }
 };
 
 struct Curve
