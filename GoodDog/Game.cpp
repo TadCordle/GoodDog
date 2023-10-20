@@ -64,6 +64,14 @@ void Game::AddItem(Vector2 pos, ItemType itemType)
 		printf("Item limit hit!\n");
 }
 
+void Game::AddCheckpoint(Vector2 pos, float musicStartTime, bool dogFlipped)
+{
+	if (checkpointsCount < 256)
+		checkpoints[checkpointsCount++] = Checkpoint(pos, musicStartTime, dogFlipped);
+	else
+		printf("Checkpoint limit hit!\n");
+}
+
 void Game::Serialize(const char* path)
 {
 	FILE* file;
@@ -128,6 +136,13 @@ void Game::Serialize(const char* path)
 		Item& item = items[i];
 		fprintf(file, "%d\n", (int)AssetType::ATItem);
 		fprintf(file, "%f %f %d\n", item.pos.x, item.pos.y, (int)item.itemType);
+	}
+
+	for (int i = 0; i < checkpointsCount; i++)
+	{
+		Checkpoint& checkpoint = checkpoints[i];
+		fprintf(file, "%d\n", (int)AssetType::ATCheckpoint);
+		fprintf(file, "%f %f %f %d\n", checkpoint.pos.x, checkpoint.pos.y, checkpoint.musicStartTime, checkpoint.dogFlipped ? 1 : 0);
 	}
 
 	fflush(file);
@@ -213,6 +228,15 @@ void Game::Deserialize(const char* path)
 			int itemType;
 			_ = fscanf_s(file, "%f %f %d\n", &pos.x, &pos.y, &itemType);
 			AddItem(pos, (ItemType)itemType);
+			break;
+		}
+		case ATCheckpoint:
+		{
+			Vector2 pos;
+			float musicStartTime;
+			int flipped;
+			_ = fscanf_s(file, "%f %f %f %d\n", &pos.x, &pos.y, &musicStartTime, &flipped);
+			AddCheckpoint(pos, musicStartTime, flipped == 1);
 			break;
 		}
 		}
@@ -450,6 +474,13 @@ void Item::Draw(Texture2D paintTexs[3])
 {
 	if (enabled)
 		DrawTextureEx(paintTexs[(int)itemType], Vector2Subtract(pos, {48.f, 48.f}), 0.f, 0.75f, WHITE);
+}
+
+Checkpoint::Checkpoint(Vector2 _pos, float _musicStartTime, bool _dogFlipped)
+{
+	pos = _pos;
+	musicStartTime = _musicStartTime;
+	dogFlipped = _dogFlipped;
 }
 
 Button GetButtonFromKeyPressed()

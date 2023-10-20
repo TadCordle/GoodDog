@@ -3,7 +3,7 @@
 int main()
 {
 	InitWindow(1280, 720, "Good Dog");
-	SetTargetFPS(120);
+	SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
 
 	InitAudioDevice();
 
@@ -411,15 +411,16 @@ int main()
 			};
 
 			// Select item
-			if (IsKeyPressed(KeyboardKey::KEY_ZERO))   editor.UpdatePlacing(ATNone);
-			if (IsKeyPressed(KeyboardKey::KEY_ONE))    editor.UpdatePlacing(ATFloor);
-			if (IsKeyPressed(KeyboardKey::KEY_TWO))    editor.UpdatePlacing(ATCurve);
-			if (IsKeyPressed(KeyboardKey::KEY_THREE))  editor.UpdatePlacing(ATElevator);
-			if (IsKeyPressed(KeyboardKey::KEY_FOUR))   editor.UpdatePlacing(ATDangerBlock);
-			if (IsKeyPressed(KeyboardKey::KEY_FIVE))   editor.UpdatePlacing(ATReverser);
-			if (IsKeyPressed(KeyboardKey::KEY_SIX))    editor.UpdatePlacing(ATCameraZone);
-			if (IsKeyPressed(KeyboardKey::KEY_SEVEN))  editor.UpdatePlacing(ATPrompt);
-			if (IsKeyPressed(KeyboardKey::KEY_EIGHT))  editor.UpdatePlacing(ATItem);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_0) || IsKeyPressed(KeyboardKey::KEY_ZERO))   editor.UpdatePlacing(ATNone);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_1) || IsKeyPressed(KeyboardKey::KEY_ONE))    editor.UpdatePlacing(ATFloor);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_2) || IsKeyPressed(KeyboardKey::KEY_TWO))    editor.UpdatePlacing(ATCurve);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_3) || IsKeyPressed(KeyboardKey::KEY_THREE))  editor.UpdatePlacing(ATElevator);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_4) || IsKeyPressed(KeyboardKey::KEY_FOUR))   editor.UpdatePlacing(ATDangerBlock);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_5) || IsKeyPressed(KeyboardKey::KEY_FIVE))   editor.UpdatePlacing(ATReverser);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_6) || IsKeyPressed(KeyboardKey::KEY_SIX))    editor.UpdatePlacing(ATCameraZone);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_7) || IsKeyPressed(KeyboardKey::KEY_SEVEN))  editor.UpdatePlacing(ATPrompt);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_8) || IsKeyPressed(KeyboardKey::KEY_EIGHT))  editor.UpdatePlacing(ATItem);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_9) || IsKeyPressed(KeyboardKey::KEY_NINE))   editor.UpdatePlacing(ATCheckpoint);
 
 			if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_RIGHT))
 			{
@@ -539,6 +540,18 @@ int main()
 						{
 							game->items[i] = game->items[game->itemsCount - 1];
 							game->itemsCount--;
+							removedSomething = true;
+							break;
+						}
+					}
+
+					if (!removedSomething)
+					for (int i = 0; i < game->checkpointsCount; i++)
+					{
+						if (IsMouseOverRectangle(game->checkpoints[i].pos, { 192.f, 192.f }))
+						{
+							game->checkpoints[i] = game->checkpoints[game->checkpointsCount - 1];
+							game->checkpointsCount--;
 							removedSomething = true;
 							break;
 						}
@@ -791,6 +804,22 @@ int main()
 					}
 					break;
 				}
+				case ATCheckpoint:
+				{
+					if (editor.placingStep == 0 && clicked)
+					{
+						// Position
+						editor.v1 = editor.placingPos;
+						editor.placingStep++;
+					}
+					else if (editor.placingStep == 1 && clicked)
+					{
+						// Dog flipped
+						bool flipped = editor.placingPos.x < editor.v1.x;
+						game->AddCheckpoint(editor.v1, 0.f, flipped);
+						editor.placingStep = 0;
+					}
+				}
 				}
 			}
 
@@ -850,6 +879,14 @@ int main()
 					Vector2 pos = { zone.pos.x - zone.size.x / 2.f, zone.pos.y - zone.size.y / 2.f };
 					Rectangle zoneRect = { pos.x, pos.y, zone.size.x, zone.size.y };
 					DrawRectangleLinesEx(zoneRect, 2.f / game->camera.zoom, SKYBLUE);
+				}
+
+				for (int i = 0; i < game->checkpointsCount; i++)
+				{
+					Checkpoint& checkpoint = game->checkpoints[i];
+					Vector2 pos = { checkpoint.pos.x - 96.f, checkpoint.pos.y - 96.f };
+					Rectangle cpRect = { pos.x, pos.y, 192.f, 192.f };
+					DrawRectangleLinesEx(cpRect, 2.f / game->camera.zoom, GREEN);
 				}
 
 				switch (editor.placingAsset)
@@ -972,6 +1009,16 @@ int main()
 					else if (editor.v5 == 2.f) itype = ITBall;
 					Item temp(editor.placingPos, itype);
 					temp.Draw(texItems);
+					break;
+				}
+				case ATCheckpoint:
+				{
+					Vector2 cpPos = editor.placingStep == 0 ? editor.placingPos : editor.v1;
+					Vector2 cpOff = { cpPos.x - 96.f, cpPos.y - 96.f };
+					Rectangle cpRect = { cpOff.x, cpOff.y, 192.f, 192.f };
+					DrawRectangleLinesEx(cpRect, 2.f / game->camera.zoom, GREEN);
+					if (editor.placingStep == 1)
+						DrawLineEx(editor.v1, { editor.v1.x + (editor.placingPos.x > editor.v1.x ? 256.f : -256.f), editor.v1.y }, 2.f / game->camera.zoom, GREEN);
 					break;
 				}
 				}

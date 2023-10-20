@@ -182,6 +182,16 @@ struct Item
 	void Draw(Texture2D paintTexs[3]);
 };
 
+struct Checkpoint
+{
+	Vector2 pos = {};
+	float musicStartTime = 0.f;
+	bool dogFlipped = false;
+
+	Checkpoint() {}
+	Checkpoint(Vector2 _pos, float _musicStartTime, bool dogFlipped);
+};
+
 enum GameState
 {
 	CUTSCENE,
@@ -201,6 +211,7 @@ struct Game
 	CameraZone cameraZones[256] = {};
 	Prompt prompts[256] = {};
 	Item items[256] = {};
+	Checkpoint checkpoints[256] = {};
 
 	int floorsCount = 0;
 	int reversersCount = 0;
@@ -210,6 +221,7 @@ struct Game
 	int cameraZonesCount = 0;
 	int promptsCount = 0;
 	int itemsCount = 0;
+	int checkpointsCount = 0;
 
 	Camera2D camera = {};
 
@@ -224,6 +236,7 @@ struct Game
 	void AddCameraZone(Vector2 pos, Vector2 size, Camera2D params);
 	void AddPrompt(Vector2 pos, Button button);
 	void AddItem(Vector2 pos, ItemType itemType);
+	void AddCheckpoint(Vector2 pos, float musicStartTime, bool dogFlipped);
 
 	void Serialize(const char* path);
 	void Deserialize(const char* path);
@@ -240,8 +253,6 @@ enum AssetType
 	ATCameraZone,
 	ATPrompt,
 	ATItem,
-
-	// Haven't done yet
 	ATCheckpoint
 };
 
