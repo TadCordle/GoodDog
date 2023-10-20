@@ -76,6 +76,7 @@ int main()
 	float hopOffset = 0.f;
 	float fallingSpeed = 0.f;
 	DogRotationTarget currentRotTarget;
+	Checkpoint lastCheckpoint(game->dogStartingPos, 0.f, false);
 
 	// Cutscene state
 	float cutsceneTimer = 0.f;
@@ -114,6 +115,7 @@ int main()
 		// Reset
 		if (IsKeyPressed(KeyboardKey::KEY_F6))
 		{
+			lastCheckpoint = Checkpoint(game->dogStartingPos, 0.f, false);
 			state = CUTSCENE;
 			cutsceneTimer = 0.f;
 			pos = game->dogStartingPos;
@@ -351,6 +353,18 @@ int main()
 				}
 			}
 
+			// Check collision with checkpoints
+			for (int i = 0; i < game->checkpointsCount; i++)
+			{
+				Checkpoint& checkpoint = game->checkpoints[i];
+				if (CheckDogHit(checkpoint.pos, 192.f, 192.f))
+				{
+					if (checkpoint.musicStartTime == 0.f)
+						checkpoint.musicStartTime = GetMusicTimePlayed(music);
+					lastCheckpoint = checkpoint;
+				}
+			}
+
 			break;
 		}
 		case WIN:
@@ -364,10 +378,34 @@ int main()
 			frame = 2;
 			fallingSpeed += 3000.f * dt;
 			pos = Vector2Add(pos, Vector2Scale(dogUp, -fallingSpeed * dt));
+
+			if (IsKeyPressed(KEY_C))
+			{
+				state = GOING;
+				cutsceneTimer = 0.f;
+				pos = lastCheckpoint.pos;
+				dogFlipped = lastCheckpoint.dogFlipped;
+				SeekMusicStream(music, lastCheckpoint.musicStartTime);
+				PlayMusicStream(music);
+				dogAngle = 0.f;
+				hopTimer = -HOP_TIMER / 2.f;
+				frame = 0;
+				hopOffset = 0.f;
+				fallingSpeed = 0.f;
+				currentRotTarget = DogRotationTarget();
+				hasSunglasses = false;
+				hasHat = false;
+				hasBall = false;
+				for (int i = 0; i < game->reversersCount; i++)
+					game->reversers[i].enabled = 1.f;
+				for (int i = 0; i < game->itemsCount; i++)
+					game->items[i].enabled = true;
+			}
 			break;
 		}
 		case EDITOR:
 		{
+			// Save
 			if (IsKeyDown(KeyboardKey::KEY_LEFT_CONTROL))
 			{
 				if (IsKeyPressed(KeyboardKey::KEY_S))
@@ -398,6 +436,7 @@ int main()
 				game->camera.target = Vector2Add(game->camera.target, mouseOffset);
 			}
 
+			// Mouse position
 			editor.placingPos = GetScreenToWorld2D(GetMousePosition(), game->camera);
 			editor.placingPos.x = ((int)(editor.placingPos.x / 4.f)) * 4.f;
 			editor.placingPos.y = ((int)(editor.placingPos.y / 4.f)) * 4.f;
