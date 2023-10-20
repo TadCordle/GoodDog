@@ -382,7 +382,6 @@ int main()
 			if (IsKeyPressed(KEY_C))
 			{
 				state = GOING;
-				cutsceneTimer = 0.f;
 				pos = lastCheckpoint.pos;
 				dogFlipped = lastCheckpoint.dogFlipped;
 				SeekMusicStream(music, lastCheckpoint.musicStartTime);
@@ -396,6 +395,29 @@ int main()
 				hasSunglasses = false;
 				hasHat = false;
 				hasBall = false;
+				for (int i = 0; i < game->reversersCount; i++)
+					game->reversers[i].enabled = 1.f;
+				for (int i = 0; i < game->itemsCount; i++)
+					game->items[i].enabled = true;
+			}
+
+			if (IsKeyPressed(KEY_R))
+			{
+				lastCheckpoint = Checkpoint(game->dogStartingPos, 0.f, false);
+				state = CUTSCENE;
+				cutsceneTimer = 0.f;
+				pos = game->dogStartingPos;
+				dogAngle = 0.f;
+				dogFlipped = true;
+				hopTimer = -HOP_TIMER / 2.f;
+				frame = 0;
+				hopOffset = 0.f;
+				fallingSpeed = 0.f;
+				currentRotTarget = DogRotationTarget();
+				hasSunglasses = false;
+				hasHat = false;
+				hasBall = false;
+				StopMusicStream(music);
 				for (int i = 0; i < game->reversersCount; i++)
 					game->reversers[i].enabled = 1.f;
 				for (int i = 0; i < game->itemsCount; i++)
