@@ -42,6 +42,7 @@ enum Button {
 };
 
 Button GetButtonFromKeyPressed();
+Button GetButtonFromKeyReleased();
 
 enum CurveType { 
 	NE, 

@@ -8,6 +8,23 @@ int main()
 	InitAudioDevice();
 
 	Music music = LoadMusicStream("resources/music.wav");
+	SetMusicVolume(music, 0.8f);
+
+	Sound sfxThrow = LoadSound("resources/throw.wav");
+	Sound sfxWoof = LoadSound("resources/woof.wav");
+	Sound sfxButton[7] = {
+		LoadSound("resources/button1.wav"),
+		LoadSound("resources/button2.wav"),
+		LoadSound("resources/button3.wav"),
+		LoadSound("resources/button4.wav"),
+		LoadSound("resources/button5.wav"),
+		LoadSound("resources/button6.wav"),
+		LoadSound("resources/button7.wav")
+	};
+	Sound sfxReverse = LoadSound("resources/reverse.wav");
+	Sound sfxLose = LoadSound("resources/lose.wav");
+	Sound sfxWin = LoadSound("resources/win.wav");
+	Sound sfxThunder = LoadSound("resources/thunder.wav");
 
 	Texture2D texDogOutline[] = {
 		LoadTexture("resources/dog_outline.png"),
@@ -85,7 +102,7 @@ int main()
 	{
 		fallingSpeed = -900.f;
 		state = LOSE;
-		// TODO: play sad sound
+		PlaySound(sfxLose);
 	};
 
 	while (!WindowShouldClose())
@@ -164,6 +181,22 @@ int main()
 				if (cameraZone.ContainsPoint(pos))
 					game->camera = cameraZone.params;
 			}
+
+			// Play sound when you hit a key
+			Button btnPressed = GetButtonFromKeyPressed();
+			if (btnPressed != Button::Cancel && btnPressed != Button::None)
+			{
+				int rand = GetRandomValue(0, 6);
+				SetSoundPitch(sfxButton[rand], 1.2f);
+				PlaySound(sfxButton[rand]);
+			}
+			Button btnReleased = GetButtonFromKeyReleased();
+			if (btnReleased != Button::Cancel && btnReleased != Button::None)
+			{
+				int rand = GetRandomValue(0, 6);
+				SetSoundPitch(sfxButton[rand], 0.8f);
+				PlaySound(sfxButton[rand]);
+			}
 		}
 
 		switch (state)
@@ -182,11 +215,15 @@ int main()
 			else if (cutsceneTimer < 1.5f)
 			{
 				//printf("Throw\n");
+				if (!IsSoundPlaying(sfxThrow))
+					PlaySound(sfxThrow);
 				dogFlipped = false;
 			}
 			else if (cutsceneTimer < 2.0f)
 			{
 				//printf("Fetch!\n");
+				if(!IsSoundPlaying(sfxWoof))
+					PlaySound(sfxWoof);
 			}
 			else
 			{
@@ -314,7 +351,7 @@ int main()
 					{
 						dogFlipped = !dogFlipped;
 						block.enabled -= dt;
-						// TODO: play reverse sound
+						PlaySound(sfxReverse);
 					}
 					else if (block.enabled == 0.f)
 					{
@@ -331,12 +368,18 @@ int main()
 				if (item.enabled && CheckDogHit(item.pos, 32.f, 512.f))
 				{
 					item.enabled = false;
-					// TODO: trigger lightning strike
+					PlaySound(sfxThunder);
+					if (item.itemType == ITBall)
+					{
+						dogFlipped = !dogFlipped;
+						PlaySound(sfxReverse);
+					}
+
 					switch (item.itemType)
 					{
-					case ITSunglasses: hasSunglasses = true;                            break;
-					case ITHat:        hasHat = true;                                   break;
-					case ITBall:       hasBall = true;        dogFlipped = !dogFlipped; break;
+					case ITSunglasses: hasSunglasses = true; break;
+					case ITHat:        hasHat = true; break;
+					case ITBall:       hasBall = true; break;
 					}
 				}
 			}
@@ -369,6 +412,7 @@ int main()
 		}
 		case WIN:
 		{
+			PlaySound(sfxWin);
 			// TODO
 			break;
 		}
@@ -1122,8 +1166,20 @@ int main()
 	UnloadTexture(texCurveSolid);
 	UnloadTexture(texCurveOutline);
 	UnloadTexture(texBG);
+
+	for (int i = 0; i < 7; i++)
+		UnloadSound(sfxButton[i]);
+	UnloadSound(sfxThrow);
+	UnloadSound(sfxWoof);
+	UnloadSound(sfxReverse);
+	UnloadSound(sfxLose);
+	UnloadSound(sfxWin);
+	UnloadSound(sfxThunder);
+
 	UnloadMusicStream(music);
+	
 	UnloadFont(font);
+	
 	CloseWindow();
 
 	delete game;

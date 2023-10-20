@@ -514,3 +514,35 @@ Button GetButtonFromKeyPressed()
 	if (IsKeyPressed(KeyboardKey::KEY_Z)) return Button::Z;
 	return Button::None;
 }
+
+Button GetButtonFromKeyReleased()
+{
+	if (IsKeyReleased(KeyboardKey::KEY_BACKSPACE)) return Button::Cancel;
+	if (IsKeyReleased(KeyboardKey::KEY_A)) return Button::A;
+	if (IsKeyReleased(KeyboardKey::KEY_B)) return Button::B;
+	if (IsKeyReleased(KeyboardKey::KEY_C)) return Button::C;
+	if (IsKeyReleased(KeyboardKey::KEY_D)) return Button::D;
+	if (IsKeyReleased(KeyboardKey::KEY_E)) return Button::E;
+	if (IsKeyReleased(KeyboardKey::KEY_F)) return Button::F;
+	if (IsKeyReleased(KeyboardKey::KEY_G)) return Button::G;
+	if (IsKeyReleased(KeyboardKey::KEY_H)) return Button::H;
+	if (IsKeyReleased(KeyboardKey::KEY_I)) return Button::I;
+	if (IsKeyReleased(KeyboardKey::KEY_J)) return Button::J;
+	if (IsKeyReleased(KeyboardKey::KEY_K)) return Button::K;
+	if (IsKeyReleased(KeyboardKey::KEY_L)) return Button::L;
+	if (IsKeyReleased(KeyboardKey::KEY_M)) return Button::M;
+	if (IsKeyReleased(KeyboardKey::KEY_N)) return Button::N;
+	if (IsKeyReleased(KeyboardKey::KEY_O)) return Button::O;
+	if (IsKeyReleased(KeyboardKey::KEY_P)) return Button::P;
+	if (IsKeyReleased(KeyboardKey::KEY_Q)) return Button::Q;
+	if (IsKeyReleased(KeyboardKey::KEY_R)) return Button::R;
+	if (IsKeyReleased(KeyboardKey::KEY_S)) return Button::S;
+	if (IsKeyReleased(KeyboardKey::KEY_T)) return Button::T;
+	if (IsKeyReleased(KeyboardKey::KEY_U)) return Button::U;
+	if (IsKeyReleased(KeyboardKey::KEY_V)) return Button::V;
+	if (IsKeyReleased(KeyboardKey::KEY_W)) return Button::W;
+	if (IsKeyReleased(KeyboardKey::KEY_X)) return Button::X;
+	if (IsKeyReleased(KeyboardKey::KEY_Y)) return Button::Y;
+	if (IsKeyReleased(KeyboardKey::KEY_Z)) return Button::Z;
+	return Button::None;
+}
