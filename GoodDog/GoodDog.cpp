@@ -124,9 +124,14 @@ int main()
 			hopOffset = 0.f;
 			fallingSpeed = 0.f;
 			currentRotTarget = DogRotationTarget();
+			hasSunglasses = false;
+			hasHat = false;
+			hasBall = false;
 			StopMusicStream(music);
 			for (int i = 0; i < game->reversersCount; i++)
 				game->reversers[i].enabled = 1.f;
+			for (int i = 0; i < game->itemsCount; i++)
+				game->items[i].enabled = true;
 		}
 
 		// Toggle fullscreen
