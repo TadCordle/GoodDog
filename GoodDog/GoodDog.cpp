@@ -20,6 +20,11 @@ int main()
 		LoadTexture("resources/dog_hop1_back.png"),
 		LoadTexture("resources/dog_hop2_back.png"),
 	};
+	Texture2D texItems[] = {
+		LoadTexture("resources/sunglasses.png"),
+		LoadTexture("resources/hat.png"),
+		LoadTexture("resources/ball.png")
+	};
 	Texture2D texLine = LoadTexture("resources/line.png");
 	Texture2D texPaintBlue = LoadTexture("resources/paint_blue.png");
 	Texture2D texPaintGray = LoadTexture("resources/paint_gray.png");
@@ -62,6 +67,9 @@ int main()
 	bool dogFlipped = true;
 	Vector2 dogUp = { 0.f, -1.f };
 	Vector2 dogRight = { 1.f, 0.f };
+	bool hasSunglasses = false;
+	bool hasHat = false;
+	bool hasBall = false;
 
 	double hopTimer = -HOP_TIMER / 2.f;
 	int frame = 0;
@@ -308,6 +316,23 @@ int main()
 					break;
 				}
 			}
+			
+			// Check collision with items
+			for (int i = 0; i < game->itemsCount; i++)
+			{
+				Item& item = game->items[i];
+				if (item.enabled && CheckDogHit(item.pos, 32.f, 512.f))
+				{
+					item.enabled = false;
+					// TODO: trigger lightning strike
+					switch (item.itemType)
+					{
+					case ITSunglasses: hasSunglasses = true;                            break;
+					case ITHat:        hasHat = true;                                   break;
+					case ITBall:       hasBall = true;        dogFlipped = !dogFlipped; break;
+					}
+				}
+			}
 
 			// Check collision with obstacle
 			for (int i = 0; i < game->dangerBlocksCount; i++)
@@ -389,14 +414,15 @@ int main()
 			if (IsKeyPressed(KeyboardKey::KEY_FIVE))   editor.UpdatePlacing(ATReverser);
 			if (IsKeyPressed(KeyboardKey::KEY_SIX))    editor.UpdatePlacing(ATCameraZone);
 			if (IsKeyPressed(KeyboardKey::KEY_SEVEN))  editor.UpdatePlacing(ATPrompt);
+			if (IsKeyPressed(KeyboardKey::KEY_EIGHT))  editor.UpdatePlacing(ATItem);
 
 			if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_RIGHT))
 			{
 				// If curve or reverser is selected, choose direction
-				if (editor.placingAsset == ATCurve || (editor.placingAsset == ATReverser && editor.placingStep == 0))
+				if (editor.placingAsset == ATCurve || (editor.placingAsset == ATReverser && editor.placingStep == 0) || editor.placingAsset == ATItem)
 				{
 					editor.v5++;
-					if (editor.v5 > 3.f)
+					if ((editor.placingAsset == ATItem && editor.v5 > 2.f) || editor.v5 > 3.f)
 						editor.v5 = 0.f;
 				}
 				else
@@ -496,6 +522,18 @@ int main()
 						{
 							game->prompts[i] = game->prompts[game->promptsCount - 1];
 							game->promptsCount--;
+							removedSomething = true;
+							break;
+						}
+					}
+
+					if (!removedSomething)
+					for (int i = 0; i < game->itemsCount; i++)
+					{
+						if (IsMouseOverRectangle(game->items[i].pos, { 128.f, 128.f }))
+						{
+							game->items[i] = game->items[game->itemsCount - 1];
+							game->itemsCount--;
 							removedSomething = true;
 							break;
 						}
@@ -735,6 +773,19 @@ int main()
 					}
 					break;
 				}
+				case ATItem:
+				{
+					if (clicked)
+					{
+						ItemType itype;
+						if (editor.v5 == 0.f) itype = ITSunglasses;
+						else if (editor.v5 == 1.f) itype = ITHat;
+						else if (editor.v5 == 2.f) itype = ITBall;
+						game->AddItem(editor.placingPos, itype);
+						editor.placingStep = 0;
+					}
+					break;
+				}
 				}
 			}
 
@@ -764,12 +815,26 @@ int main()
 				game->reversers[i].Draw(texReverserBackEnabled, texReverserBackDisabled, texReverserOutline, texReverserArrows);
 			for (int i = 0; i < game->promptsCount; i++)
 				game->prompts[i].Draw(font);
+			for (int i = 0; i < game->itemsCount; i++)
+				game->items[i].Draw(texItems);
 
 			Vector2 offsetPos = Vector2Add(pos, Vector2Scale(dogUp, -hopOffset));
 			Vector2 drawPos = Vector2Add(offsetPos, Vector2Scale(dogRight, dogFlipped ? -12.f : 12.f));
 			dogBack.Draw(texDogBack[frame], drawPos, { 0.75f, 0.75f }, dogAngle, dogFlipped, false);
 			dogOutline.Draw(state == LOSE ? texDogLose : texDogOutline[frame], drawPos, { 0.75f, 0.75f }, dogAngle, dogFlipped, true);
 			//DrawRectangleLines((int)pos.x - 8.f, (int)pos.y - 8.f, 16, 16, RED);
+			
+			// Items
+			if (hasSunglasses)
+			{
+				Vector2 eyesPos = Vector2Add(Vector2Scale(dogRight, dogFlipped ? 26.f : 48.f), Vector2Scale(dogUp, 28.f - hopOffset + (frame == 2 ? 29.f : 0.f)));
+				dogOutline.Draw(texItems[0], Vector2Add(pos, eyesPos), { 0.75f, 0.75f }, dogAngle, dogFlipped, true);
+			}
+			if (hasHat)
+			{
+				Vector2 headPos = Vector2Add(Vector2Scale(dogRight, dogFlipped ? 24.f : 46.f), Vector2Scale(dogUp, 90.f - hopOffset + (frame == 2 ? 29.f : 0.f)));
+				dogOutline.Draw(texItems[1], Vector2Add(pos, headPos), { 0.75f, 0.75f }, dogAngle, dogFlipped, true);
+			}
 
 			// Draw edits in progress
 			if (state == EDITOR)
@@ -892,6 +957,17 @@ int main()
 						DrawRectangle((int)editor.placingPos.x - 32, (int)editor.placingPos.y - 32, 64, 64, WHITE);
 					else
 						DrawButtonText(font, editor.v1, (int)Button::QMark);
+					break;
+				}
+				case ATItem:
+				{
+					ItemType itype;
+					if (editor.v5 == 0.f) itype = ITSunglasses;
+					else if (editor.v5 == 1.f) itype = ITHat;
+					else if (editor.v5 == 2.f) itype = ITBall;
+					Item temp(editor.placingPos, itype);
+					temp.Draw(texItems);
+					break;
 				}
 				}
 			}

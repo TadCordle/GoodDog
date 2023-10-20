@@ -56,6 +56,14 @@ void Game::AddPrompt(Vector2 pos, Button button)
 		printf("Prompt limit hit!\n");
 }
 
+void Game::AddItem(Vector2 pos, ItemType itemType)
+{
+	if (itemsCount < 256)
+		items[itemsCount++] = Item(pos, itemType);
+	else
+		printf("Item limit hit!\n");
+}
+
 void Game::Serialize(const char* path)
 {
 	FILE* file;
@@ -113,6 +121,13 @@ void Game::Serialize(const char* path)
 		Prompt& prompt = prompts[i];
 		fprintf(file, "%d\n", (int)AssetType::ATPrompt);
 		fprintf(file, "%f %f %d\n", prompt.pos.x, prompt.pos.y, (int)prompt.button);
+	}
+
+	for (int i = 0; i < itemsCount; i++)
+	{
+		Item& item = items[i];
+		fprintf(file, "%d\n", (int)AssetType::ATItem);
+		fprintf(file, "%f %f %d\n", item.pos.x, item.pos.y, (int)item.itemType);
 	}
 
 	fflush(file);
@@ -190,6 +205,14 @@ void Game::Deserialize(const char* path)
 			int button;
 			_ = fscanf_s(file, "%f %f %d\n", &pos.x, &pos.y, &button);
 			AddPrompt(pos, (Button)button);
+			break;
+		}
+		case ATItem:
+		{
+			Vector2 pos;
+			int itemType;
+			_ = fscanf_s(file, "%f %f %d\n", &pos.x, &pos.y, &itemType);
+			AddItem(pos, (ItemType)itemType);
 			break;
 		}
 		}
@@ -415,6 +438,18 @@ Prompt::Prompt(Vector2 _pos, Button _button)
 void Prompt::Draw(Font& font)
 {
 	DrawButtonText(font, pos, (int)button);
+}
+
+Item::Item(Vector2 _pos, ItemType _itemType)
+{
+	pos = _pos;
+	itemType = _itemType;
+}
+
+void Item::Draw(Texture2D paintTexs[3])
+{
+	if (enabled)
+		DrawTextureEx(paintTexs[(int)itemType], Vector2Subtract(pos, {48.f, 48.f}), 0.f, 0.75f, WHITE);
 }
 
 Button GetButtonFromKeyPressed()

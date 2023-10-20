@@ -156,12 +156,30 @@ struct CameraZone
 
 struct Prompt
 {
-	Vector2 pos{};
+	Vector2 pos = {};
 	Button button;
 
 	Prompt() {}
 	Prompt(Vector2 _pos, Button _button);
 	void Draw(Font& font);
+};
+
+enum ItemType
+{
+	ITSunglasses,
+	ITHat,
+	ITBall
+};
+
+struct Item
+{
+	Vector2 pos = {};
+	ItemType itemType;
+	bool enabled = true;
+
+	Item() {}
+	Item(Vector2 _pos, ItemType _itemType);
+	void Draw(Texture2D paintTexs[3]);
 };
 
 enum GameState
@@ -182,6 +200,7 @@ struct Game
 	Reverser reversers[256] = {};
 	CameraZone cameraZones[256] = {};
 	Prompt prompts[256] = {};
+	Item items[256] = {};
 
 	int floorsCount = 0;
 	int reversersCount = 0;
@@ -190,6 +209,7 @@ struct Game
 	int curvesCount = 0;
 	int cameraZonesCount = 0;
 	int promptsCount = 0;
+	int itemsCount = 0;
 
 	Camera2D camera = {};
 
@@ -203,6 +223,7 @@ struct Game
 	void AddReverser(Vector2 pos1, Vector2 pos2, Direction dir, Button button);
 	void AddCameraZone(Vector2 pos, Vector2 size, Camera2D params);
 	void AddPrompt(Vector2 pos, Button button);
+	void AddItem(Vector2 pos, ItemType itemType);
 
 	void Serialize(const char* path);
 	void Deserialize(const char* path);
@@ -218,12 +239,10 @@ enum AssetType
 	ATReverser,
 	ATCameraZone,
 	ATPrompt,
+	ATItem,
 
 	// Haven't done yet
-	ATCheckpoint,
-	ATShades,
-	ATHat,
-	ATBall
+	ATCheckpoint
 };
 
 struct EditorState
