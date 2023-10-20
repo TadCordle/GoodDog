@@ -258,9 +258,9 @@ void Floor::Update(float dt, float wobbleRate)
 	line2.Update(dt, wobbleRate);
 }
 
-void Floor::Draw(Texture2D& lineTex, Texture2D& paintTex)
+void Floor::Draw(Texture2D& lineTex, Texture2D& paintTex, bool lightning)
 {
-	DrawPaintLine(paintTex, { start.x, start.y }, { end.x, end.y });
+	DrawPaintLine(paintTex, { start.x, start.y }, { end.x, end.y }, lightning);
 	Vector2 offsetDir = Vector2Normalize({ start.y - end.y, end.x - start.x });
 	Vector2 offsetPos = Vector2Scale(offsetDir, 12.f);
 	Vector2 offsetNeg = Vector2Scale(offsetDir, -12.f);
@@ -290,11 +290,11 @@ void Elevator::Update(float dt, float wobbleRate)
 	if (currentTravelTime > travelTime) currentTravelTime = travelTime;
 }
 
-void Elevator::Draw(Texture2D& lineTex, Texture2D& paintTex)
+void Elevator::Draw(Texture2D& lineTex, Texture2D& paintTex, bool lightning)
 {
 	Vector2 s = GetCurrentStart();
 	Vector2 e = GetCurrentEnd();
-	DrawPaintLine(paintTex, { s.x, s.y }, { e.x, e.y });
+	DrawPaintLine(paintTex, { s.x, s.y }, { e.x, e.y }, lightning);
 	Vector2 offsetDir = Vector2Normalize({ s.y - e.y, e.x - s.x });
 	Vector2 offsetPos = Vector2Scale(offsetDir, 12.f);
 	Vector2 offsetNeg = Vector2Scale(offsetDir, -12.f);
@@ -320,14 +320,14 @@ void DangerBlock::Update(float dt, float wobbleRate)
 	if (currentTravelTime > 0.2f) currentTravelTime = 0.2f;
 }
 
-void DangerBlock::Draw(Texture2D& lineTex, Texture2D& paintTex, Font& font)
+void DangerBlock::Draw(Texture2D& lineTex, Texture2D& paintTex, Font& font, bool lightning)
 {
 	Vector2 p = GetCurrentPos();
 	Vector2 topLeft  = { p.x - dimensions.x / 2.f, p.y - dimensions.y / 2.f };
 	Vector2 botRight = { p.x + dimensions.x / 2.f, p.y + dimensions.y / 2.f };
-	wobblyRectangle.Draw(lineTex, paintTex, topLeft, botRight);
+	wobblyRectangle.Draw(lineTex, paintTex, topLeft, botRight, lightning);
 	if (button != Button::None && button != Button::Cancel)
-		DrawButtonText(font, p, (int)button);
+		DrawButtonText(font, p, (int)button, lightning);
 }
 
 Reverser::Reverser(Vector2 _pos1, Vector2 _pos2, Direction _dir, Button _button)
@@ -357,7 +357,7 @@ void Reverser::Update(float dt, float wobbleRate)
 	if (currentTravelTime > 0.4f) currentTravelTime = 0.4f;
 }
 
-void Reverser::Draw(Texture2D& texBackEnabled, Texture2D& texBackDisabled, Texture2D& texOutline, Texture2D& texArrows)
+void Reverser::Draw(Texture2D& texBackEnabled, Texture2D& texBackDisabled, Texture2D& texOutline, Texture2D& texArrows, bool lightning)
 {
 	Vector2 p = GetCurrentPos();
 	Vector2 scale = { 0.75f, 0.75f };
@@ -365,11 +365,11 @@ void Reverser::Draw(Texture2D& texBackEnabled, Texture2D& texBackDisabled, Textu
 	bool flipped = dir == Left || dir == Up;
 	if (enabled < 1.f)
 	{
-		texBack.Draw(texBackDisabled, p, scale, angle, flipped, false, 1.f);
+		texBack.Draw(texBackDisabled, p, scale, angle, flipped, false, 1.f, lightning);
 	}
 	if (enabled > 0.f)
 	{
-		texBack.Draw(texBackEnabled, p, scale, angle, flipped, false, enabled);
+		texBack.Draw(texBackEnabled, p, scale, angle, flipped, false, enabled, lightning);
 		texFront.Draw(texArrows, p, scale, angle, flipped, false, enabled);
 	}
 	texFront.Draw(texOutline, p, scale, angle, flipped, true, 1.f);
@@ -381,7 +381,7 @@ Curve::Curve(Vector2 _pos, CurveType _type)
 	type = _type;
 }
 
-void Curve::Draw(Texture2D& lineTex, Texture2D& paintTex)
+void Curve::Draw(Texture2D& lineTex, Texture2D& paintTex, bool lightning)
 {
 	Rectangle srcRect = {};
 	switch (type)
@@ -394,8 +394,8 @@ void Curve::Draw(Texture2D& lineTex, Texture2D& paintTex)
 
 	Rectangle dstRect = { pos.x, pos.y, 128.f, 128.f };
 	Vector2 origin = { 64.f, 64.f };
-	DrawTexturePro(paintTex, srcRect, dstRect, origin, 0.f, WHITE);
-	DrawTexturePro(lineTex, srcRect, dstRect, origin, 0.f, WHITE);
+	DrawTexturePro(paintTex, srcRect, dstRect, origin, 0.f, lightning ? BLACK : WHITE);
+	DrawTexturePro(lineTex, srcRect, dstRect, origin, 0.f, lightning ? BLACK : WHITE);
 }
 
 bool Curve::HitCurve(Vector2 dogPos, Vector2 offset)
@@ -459,9 +459,9 @@ Prompt::Prompt(Vector2 _pos, Button _button)
 	button = _button;
 }
 
-void Prompt::Draw(Font& font)
+void Prompt::Draw(Font& font, bool lightning)
 {
-	DrawButtonText(font, pos, (int)button);
+	DrawButtonText(font, pos, (int)button, lightning);
 }
 
 Item::Item(Vector2 _pos, ItemType _itemType)

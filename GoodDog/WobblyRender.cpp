@@ -22,7 +22,7 @@ void WobblyTexture::Update(float dt, float wobbleRate)
 	}
 }
 
-void WobblyTexture::Draw(Texture2D& texture, Vector2 pos, Vector2 scale, float angle, bool hFlipped, bool stableWobble, float alpha)
+void WobblyTexture::Draw(Texture2D& texture, Vector2 pos, Vector2 scale, float angle, bool hFlipped, bool stableWobble, float alpha, bool lightning)
 {
 	float randOffX = hash_float(wobbleState) * 10.f - 5.f;
 	float randOffY = hash_float(wobbleState + 1) * 10.f - 5.f;
@@ -34,7 +34,8 @@ void WobblyTexture::Draw(Texture2D& texture, Vector2 pos, Vector2 scale, float a
 	Rectangle srcRect = { 0.f, 0.f, (hFlipped ? -1.f : 1.f) * (float)texture.width, (float)texture.height };
 	Rectangle dstRect = { pos.x + randOffX * scale.x, pos.y + randOffY * scale.y, frameSize.x, frameSize.y };
 	Vector2 origin = { frameSize.x / 2.f, frameSize.y / 2.f };
-	Color color = { 255, 255, 255, (unsigned char)(alpha * 255) };
+	unsigned char colVal = lightning ? 0 : 255;
+	Color color = { colVal, colVal, colVal, (unsigned char)(alpha * 255) };
 	DrawTexturePro(texture, srcRect, dstRect, origin, angle + randAngle, color);
 }
 
@@ -73,7 +74,7 @@ void WobblyLine::Draw(Texture2D& lineTex, Vector2 start, Vector2 end)
 	}
 }
 
-void DrawPaintLine(Texture2D& paintTex, Vector2 start, Vector2 end)
+void DrawPaintLine(Texture2D& paintTex, Vector2 start, Vector2 end, bool lightning)
 {
 	float totalLength = Vector2Distance(start, end);
 	if (totalLength < 256.f)
@@ -82,7 +83,7 @@ void DrawPaintLine(Texture2D& paintTex, Vector2 start, Vector2 end)
 		Rectangle dstRect = { (start.x + end.x) / 2.f, (start.y + end.y) / 2.f, totalLength, 24.f };
 		Vector2 origin = { totalLength / 2.f, 12.f };
 		float angle = atan2f(end.y - start.y, end.x - start.x) * RAD2DEG;
-		DrawTexturePro(paintTex, srcRect, dstRect, origin, angle, WHITE);
+		DrawTexturePro(paintTex, srcRect, dstRect, origin, angle, lightning ? BLACK : WHITE);
 	}
 	else
 	{
@@ -97,7 +98,7 @@ void DrawPaintLine(Texture2D& paintTex, Vector2 start, Vector2 end)
 			Rectangle dstRect = { (s.x + e.x) / 2.f, (s.y + e.y) / 2.f, 256.f, 24.f};
 			Vector2 origin = { 128.f, 12.f };
 			float angle = atan2f(e.y - s.y, e.x - s.x) * RAD2DEG;
-			DrawTexturePro(paintTex, srcRect, dstRect, origin, angle, WHITE);
+			DrawTexturePro(paintTex, srcRect, dstRect, origin, angle, lightning ? BLACK : WHITE);
 			s = e;
 		}
 	}
@@ -111,7 +112,7 @@ void WobblyRectangle::Update(float dt, float wobbleRate)
 	right.Update(dt, wobbleRate);
 }
 
-void WobblyRectangle::Draw(Texture2D& lineTex, Texture2D& paintTex, Vector2 topLeft, Vector2 botRight)
+void WobblyRectangle::Draw(Texture2D& lineTex, Texture2D& paintTex, Vector2 topLeft, Vector2 botRight, bool lightning)
 {
 	float sizeX = botRight.x - topLeft.x;
 	float sizeY = botRight.y - topLeft.y;
@@ -126,7 +127,7 @@ void WobblyRectangle::Draw(Texture2D& lineTex, Texture2D& paintTex, Vector2 topL
 		{
 			float dstY = y == numFillsY - 1 ? (botRight.y - srcRectSize.y) : (y * 256.f + topLeft.y);
 			Rectangle dstRect = { dstX, dstY, srcRectSize.x, srcRectSize.y };
-			DrawTexturePro(paintTex, srcRect, dstRect, { 0.f, 0.f }, 0.f, WHITE);
+			DrawTexturePro(paintTex, srcRect, dstRect, { 0.f, 0.f }, 0.f, lightning ? BLACK : WHITE);
 		}
 	}
 
@@ -147,7 +148,7 @@ void DrawQuestionMark(Font& font, Vector2 position)
 	DrawTextEx(font, str, Vector2Subtract(position, Vector2Scale(fontSize, 0.5f)), 80, 0, MAGENTA);
 }
 
-void DrawButtonText(Font& font, Vector2 position, int button)
+void DrawButtonText(Font& font, Vector2 position, int button, bool lightning)
 {
 	if (button < 65)
 		DrawQuestionMark(font, position);
@@ -160,6 +161,6 @@ void DrawButtonText(Font& font, Vector2 position, int button)
 		DrawTextEx(font, sc.str, Vector2Add(Vector2Subtract(position, Vector2Scale(fontSize, 0.5f)), { -3.f, 3.f }), 80, 0, BLACK);
 		DrawTextEx(font, sc.str, Vector2Add(Vector2Subtract(position, Vector2Scale(fontSize, 0.5f)), { 3.f, -3.f }), 80, 0, BLACK);
 		DrawTextEx(font, sc.str, Vector2Add(Vector2Subtract(position, Vector2Scale(fontSize, 0.5f)), { -3.f, -3.f }), 80, 0, BLACK);
-		DrawTextEx(font, sc.str, Vector2Subtract(position, Vector2Scale(fontSize, 0.5f)), 80, 0, brightened);
+		DrawTextEx(font, sc.str, Vector2Subtract(position, Vector2Scale(fontSize, 0.5f)), 80, 0, lightning ? BLACK : brightened);
 	}
 }

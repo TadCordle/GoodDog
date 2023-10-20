@@ -47,7 +47,7 @@ struct WobblyTexture
 	int wobbleState = 0;
 
 	void Update(float dt, float wobbleRate);
-	void Draw(Texture2D& texture, Vector2 pos, Vector2 scale, float angle, bool hFlipped = false, bool stableWobble = false, float alpha = 1.f);
+	void Draw(Texture2D& texture, Vector2 pos, Vector2 scale, float angle, bool hFlipped = false, bool stableWobble = false, float alpha = 1.f, bool lightning = false);
 };
 
 struct WobblyLine
@@ -66,8 +66,8 @@ struct WobblyRectangle
 
 	WobblyRectangle() {}
 	void Update(float dt, float wobbleRate);
-	void Draw(Texture2D& lineTex, Texture2D& paintTex, Vector2 topLeft, Vector2 botRight);
+	void Draw(Texture2D& lineTex, Texture2D& paintTex, Vector2 topLeft, Vector2 botRight, bool lightning);
 };
 
-void DrawPaintLine(Texture2D& paintTex, Vector2 start, Vector2 end);
-void DrawButtonText(Font& font, Vector2 position, int button);
+void DrawPaintLine(Texture2D& paintTex, Vector2 start, Vector2 end, bool lightning);
+void DrawButtonText(Font& font, Vector2 position, int button, bool lightning);

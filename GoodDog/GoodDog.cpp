@@ -53,6 +53,7 @@ int main()
 	Texture2D texReverserArrows = LoadTexture("resources/reverser_arrows.png");
 	Texture2D texCurveSolid = LoadTexture("resources/curve_solid.png");
 	Texture2D texCurveOutline = LoadTexture("resources/curve_outline.png");
+	Texture2D texLightning = LoadTexture("resources/lightning.png");
 	Texture2D texBG = LoadTexture("resources/bg.png");
 
 	WobblyTexture dogOutline, dogBack;
@@ -98,6 +99,13 @@ int main()
 	// Cutscene state
 	float cutsceneTimer = 0.f;
 
+	float lightningFlashTime = 0.f;
+	auto LightningFlash = [&]()
+	{
+		bool result = (int)(lightningFlashTime * 30) % 2 != 0;
+		return result;
+	};
+
 	auto Lose = [&]()
 	{
 		fallingSpeed = -900.f;
@@ -109,6 +117,8 @@ int main()
 	{
 		float dt = GetFrameTime();
 		if (dt > 0.03333333f) dt = 0.03333333f;
+
+		if (lightningFlashTime > 0.f) lightningFlashTime -= dt;
 
 		// Toggle between editor and play mode
 		if (IsKeyPressed(KeyboardKey::KEY_F5))
@@ -369,6 +379,7 @@ int main()
 				{
 					item.enabled = false;
 					PlaySound(sfxThunder);
+					lightningFlashTime = 0.233333333333f;
 					if (item.itemType == ITBall)
 					{
 						dogFlipped = !dogFlipped;
@@ -937,23 +948,29 @@ int main()
 		
 		BeginDrawing();
 		{
-			ClearBackground(DARKPURPLE);
-			DrawTexture(texBG, 0, 0, WHITE);
+			bool lightning = LightningFlash();
+			if (lightning)
+				ClearBackground({130, 90, 255, 255});
+			else
+			{
+				ClearBackground(DARKPURPLE);
+				DrawTexture(texBG, 0, 0, WHITE);
+			}
 
 			BeginMode2D(game->camera);
 
 			for (int i = 0; i < game->dangerBlocksCount; i++)
-				game->dangerBlocks[i].Draw(texLine, texPaintGray, font);
+				game->dangerBlocks[i].Draw(texLine, texPaintGray, font, lightning);
 			for (int i = 0; i < game->curvesCount; i++)
-				game->curves[i].Draw(texCurveOutline, texCurveSolid);
+				game->curves[i].Draw(texCurveOutline, texCurveSolid, lightning);
 			for (int i = 0; i < game->floorsCount; i++)
-				game->floors[i].Draw(texLine, texPaintBlue);
+				game->floors[i].Draw(texLine, texPaintBlue, lightning);
 			for (int i = 0; i < game->elevatorsCount; i++)
-				game->elevators[i].Draw(texLine, texPaintLightGreen);
+				game->elevators[i].Draw(texLine, texPaintLightGreen, lightning);
 			for (int i = 0; i < game->reversersCount; i++)
-				game->reversers[i].Draw(texReverserBackEnabled, texReverserBackDisabled, texReverserOutline, texReverserArrows);
+				game->reversers[i].Draw(texReverserBackEnabled, texReverserBackDisabled, texReverserOutline, texReverserArrows, lightning);
 			for (int i = 0; i < game->promptsCount; i++)
-				game->prompts[i].Draw(font);
+				game->prompts[i].Draw(font, lightning);
 			for (int i = 0; i < game->itemsCount; i++)
 				game->items[i].Draw(texItems);
 
@@ -1003,7 +1020,7 @@ int main()
 					else
 					{
 						Floor temp(editor.v1, editor.placingPos);
-						temp.Draw(texLine, texPaintBlue);
+						temp.Draw(texLine, texPaintBlue, false);
 					}
 					
 					break;
@@ -1017,7 +1034,7 @@ int main()
 					else if (editor.v5 == 3.f) ctype = SW;
 
 					Curve temp(editor.placingPos, ctype);
-					temp.Draw(texCurveOutline, texCurveSolid);
+					temp.Draw(texCurveOutline, texCurveSolid, false);
 					
 					break;
 				}
@@ -1028,7 +1045,7 @@ int main()
 					else
 					{
 						Elevator temp(editor.v1, editor.placingStep == 1 ? editor.placingPos : editor.v2, {}, {}, 0.5f, Button::None);
-						temp.Draw(texLine, texPaintLightGreen);
+						temp.Draw(texLine, texPaintLightGreen, false);
 
 						if (editor.placingStep == 2)
 							DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.placingPos.x, (int)editor.placingPos.y, GREEN);
@@ -1041,7 +1058,7 @@ int main()
 						{
 							DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.v3.x, (int)editor.v3.y, GREEN);
 							DrawLine((int)editor.v2.x, (int)editor.v2.y, (int)editor.v4.x, (int)editor.v4.y, GREEN);
-							DrawButtonText(font, Vector2Scale(Vector2Add(editor.v1, editor.v2), 0.5f), (int)Button::QMark);
+							DrawButtonText(font, Vector2Scale(Vector2Add(editor.v1, editor.v2), 0.5f), (int)Button::QMark, false);
 						}
 					}
 					break;
@@ -1056,7 +1073,7 @@ int main()
 						Vector2 pos = Vector2Scale(Vector2Add(editor.v1, botRight), 0.5f);
 						Vector2 size = Vector2Subtract(botRight, editor.v1);
 						DangerBlock temp(pos, {}, size, editor.placingStep == 3 ? Button::QMark : Button::None);
-						temp.Draw(texLine, texPaintGray, font);
+						temp.Draw(texLine, texPaintGray, font, false);
 
 						if (editor.placingStep > 1)
 						{
@@ -1075,13 +1092,13 @@ int main()
 					else if (editor.v5 == 3.f) dir = Down;
 
 					Reverser temp(editor.placingStep == 0 ? editor.placingPos : editor.v1, {}, dir, Button::None);
-					temp.Draw(texReverserBackEnabled, texReverserBackDisabled, texReverserOutline, texReverserArrows);
+					temp.Draw(texReverserBackEnabled, texReverserBackDisabled, texReverserOutline, texReverserArrows, false);
 					if (editor.placingStep == 1)
 						DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.placingPos.x, (int)editor.placingPos.y, GREEN);
 					if (editor.placingStep == 2)
 					{
 						DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.v2.x, (int)editor.v2.y, GREEN);
-						DrawButtonText(font, editor.v1, (int)Button::QMark);
+						DrawButtonText(font, editor.v1, (int)Button::QMark, false);
 					}
 					break;
 				}
@@ -1103,7 +1120,7 @@ int main()
 					if (editor.placingStep == 0)
 						DrawRectangle((int)editor.placingPos.x - 32, (int)editor.placingPos.y - 32, 64, 64, WHITE);
 					else
-						DrawButtonText(font, editor.v1, (int)Button::QMark);
+						DrawButtonText(font, editor.v1, (int)Button::QMark, false);
 					break;
 				}
 				case ATItem:
@@ -1130,6 +1147,9 @@ int main()
 			}
 
 			EndMode2D();
+
+			if (lightningFlashTime > 0.2f)
+				DrawTexture(texLightning, 200, 0, WHITE);
 
 			if (state == LOSE)
 			{

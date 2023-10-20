@@ -65,7 +65,7 @@ struct Floor
 	Floor() {}
 	Floor(Vector2 _start, Vector2 _end);
 	void Update(float dt, float wobbleRate);
-	void Draw(Texture2D& lineTex, Texture2D& paintTex);
+	void Draw(Texture2D& lineTex, Texture2D& paintTex, bool lightning);
 };
 
 struct Elevator
@@ -82,7 +82,7 @@ struct Elevator
 	Elevator() {}
 	Elevator(Vector2 _start, Vector2 _end, Vector2 _newStart, Vector2 _newEnd, float _travelTime, Button _button);
 	void Update(float dt, float wobbleRate);
-	void Draw(Texture2D& lineTex, Texture2D& paintTex);
+	void Draw(Texture2D& lineTex, Texture2D& paintTex, bool lightning);
 
 	inline Vector2 GetCurrentStart() { float t = currentTravelTime / travelTime; return Vector2Lerp(start, newStart, t); }
 	inline Vector2 GetCurrentEnd()   { float t = currentTravelTime / travelTime; return Vector2Lerp(  end,   newEnd, t); }
@@ -100,7 +100,7 @@ struct DangerBlock
 	DangerBlock() {}
 	DangerBlock(Vector2 _pos1, Vector2 _pos2, Vector2 _dimensions, Button _button);
 	void Update(float dt, float wobbleRate);
-	void Draw(Texture2D& lineTex, Texture2D& paintTex, Font& font);
+	void Draw(Texture2D& lineTex, Texture2D& paintTex, Font& font, bool lightning);
 
 	inline Vector2 GetCurrentPos() { float t = currentTravelTime / 0.2f; return Vector2Lerp(pos1, pos2, t); }
 };
@@ -126,7 +126,7 @@ struct Reverser
 	Reverser() {}
 	Reverser(Vector2 _pos1, Vector2 _pos2, Direction _dir, Button _button);
 	void Update(float dt, float wobbleRate);
-	void Draw(Texture2D& texBackEnabled, Texture2D& texBackDisabled, Texture2D& texOutline, Texture2D& texArrows);
+	void Draw(Texture2D& texBackEnabled, Texture2D& texBackDisabled, Texture2D& texOutline, Texture2D& texArrows, bool lightning);
 
 	inline Vector2 GetCurrentPos() { float t = currentTravelTime / 0.2f; return Vector2Lerp(pos1, pos2, t); }
 };
@@ -139,7 +139,7 @@ struct Curve
 
 	Curve() {}
 	Curve(Vector2 _pos, CurveType _type);
-	void Draw(Texture2D& lineTex, Texture2D& paintTex);
+	void Draw(Texture2D& lineTex, Texture2D& paintTex, bool lightning);
 	bool HitCurve(Vector2 dogPos, Vector2 offset);
 	DogRotationTarget GetRotationTarget(Vector2 point, Vector2 up, Vector2 right);
 };
@@ -162,7 +162,7 @@ struct Prompt
 
 	Prompt() {}
 	Prompt(Vector2 _pos, Button _button);
-	void Draw(Font& font);
+	void Draw(Font& font, bool lightning);
 };
 
 enum ItemType
