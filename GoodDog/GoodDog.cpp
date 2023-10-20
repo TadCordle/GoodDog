@@ -994,10 +994,23 @@ int main()
 	{
 		UnloadTexture(texDogBack[i]);
 		UnloadTexture(texDogOutline[i]);
+		UnloadTexture(texItems[i]);
 	}
+	UnloadTexture(texDogLose);
 	UnloadTexture(texLine);
 	UnloadTexture(texPaintBlue);
+	UnloadTexture(texPaintGray);
+	UnloadTexture(texPaintLightGreen);
+	UnloadTexture(texPaintLightBlue);
+	UnloadTexture(texReverserBackEnabled);
+	UnloadTexture(texReverserBackDisabled);
+	UnloadTexture(texReverserOutline);
+	UnloadTexture(texReverserArrows);
+	UnloadTexture(texCurveSolid);
+	UnloadTexture(texCurveOutline);
+	UnloadTexture(texBG);
 	UnloadMusicStream(music);
+	UnloadFont(font);
 	CloseWindow();
 
 	delete game;
