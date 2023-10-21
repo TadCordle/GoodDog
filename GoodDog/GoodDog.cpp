@@ -962,6 +962,8 @@ int main()
 
 			BeginMode2D(game->camera);
 
+			for (int i = 0; i < game->promptsCount; i++)
+				game->prompts[i].Draw(font, lightning);
 			for (int i = 0; i < game->dangerBlocksCount; i++)
 				game->dangerBlocks[i].Draw(texLine, texPaintGray, font, lightning);
 			for (int i = 0; i < game->curvesCount; i++)
@@ -972,8 +974,6 @@ int main()
 				game->elevators[i].Draw(texLine, texPaintLightGreen, lightning);
 			for (int i = 0; i < game->reversersCount; i++)
 				game->reversers[i].Draw(texReverserBackEnabled, texReverserBackDisabled, texReverserOutline, texReverserArrows, lightning);
-			for (int i = 0; i < game->promptsCount; i++)
-				game->prompts[i].Draw(font, lightning);
 			for (int i = 0; i < game->itemsCount; i++)
 				game->items[i].Draw(texItems);
 

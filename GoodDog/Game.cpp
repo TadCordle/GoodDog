@@ -354,7 +354,7 @@ void Reverser::Update(float dt, float wobbleRate)
 
 	currentTravelTime += dt * (IsKeyDown((int)button) ? 1 : -1);
 	if (currentTravelTime < 0.f)  currentTravelTime = 0.f;
-	if (currentTravelTime > 0.4f) currentTravelTime = 0.4f;
+	if (currentTravelTime > 0.3f) currentTravelTime = 0.3f;
 }
 
 void Reverser::Draw(Texture2D& texBackEnabled, Texture2D& texBackDisabled, Texture2D& texOutline, Texture2D& texArrows, bool lightning)
