@@ -1,6 +1,6 @@
 #include "Game.h"
 
-#define PLAY_MUSIC 0
+#define PLAY_MUSIC 1
 
 int main()
 {
