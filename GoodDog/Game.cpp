@@ -409,31 +409,31 @@ DogRotationTarget Curve::GetRotationTarget(Vector2 point, Vector2 up, Vector2 ri
 {
 	if (type == SE)
 	{
-		if (HitCurve(point, { -16.f, 128.f }) && right.x ==  1.f && up.y ==  1.f) return {  90.f,  -80.f };
+		if (HitCurve(point, { -16.f, 128.f }) && right.x ==  1.f && up.y ==  1.f) return {  90.f,  -90.f };
 		if (HitCurve(point, { -96.f, -64.f }) && right.x ==  1.f && up.y == -1.f) return { -90.f, -240.f };
 		if (HitCurve(point, { -64.f, -96.f }) && right.y ==  1.f && up.x == -1.f) return { 360.f,  240.f };
 		if (HitCurve(point, { 128.f, -16.f }) && right.y ==  1.f && up.x ==  1.f) return { 180.f,   80.f };
 	} 
 	else if (type == SW)
 	{
-		if (HitCurve(point, { -16.f, 128.f }) && right.x == -1.f && up.y ==  1.f) return { 270.f,   80.f };
+		if (HitCurve(point, { -16.f, 128.f }) && right.x == -1.f && up.y ==  1.f) return { 270.f,   90.f };
 		if (HitCurve(point, {  64.f, -64.f }) && right.x == -1.f && up.y == -1.f) return {  90.f,  240.f };
 		if (HitCurve(point, {  32.f, -96.f }) && right.y ==  1.f && up.x ==  1.f) return {   0.f, -240.f };
-		if (HitCurve(point, {-160.f, -16.f }) && right.y ==  1.f && up.x == -1.f) return { 180.f,  -80.f };
+		if (HitCurve(point, {-160.f, -16.f }) && right.y ==  1.f && up.x == -1.f) return { 180.f,  -90.f };
 	}
 	else if (type == NE)
 	{
-		if (HitCurve(point, { -16.f,-160.f }) && right.x ==  1.f && up.y == -1.f) return {  90.f,   80.f };
+		if (HitCurve(point, { -16.f,-160.f }) && right.x ==  1.f && up.y == -1.f) return {  90.f,   90.f };
 		if (HitCurve(point, { -96.f,  32.f }) && right.x ==  1.f && up.y ==  1.f) return { 270.f,  240.f };
 		if (HitCurve(point, { -64.f,  64.f }) && right.y == -1.f && up.x == -1.f) return { 180.f, -240.f };
-		if (HitCurve(point, { 128.f, -16.f }) && right.y == -1.f && up.x ==  1.f) return {   0.f,  -80.f };
+		if (HitCurve(point, { 128.f, -16.f }) && right.y == -1.f && up.x ==  1.f) return {   0.f,  -90.f };
 	}
 	else
 	{
-		if (HitCurve(point, { -16.f,-160.f }) && right.x == -1.f && up.y == -1.f) return { -90.f,  -80.f };
+		if (HitCurve(point, { -16.f,-160.f }) && right.x == -1.f && up.y == -1.f) return { -90.f,  -90.f };
 		if (HitCurve(point, {  64.f,  32.f }) && right.x == -1.f && up.y ==  1.f) return {  90.f, -240.f };
 		if (HitCurve(point, {  32.f,  64.f }) && right.y == -1.f && up.x ==  1.f) return { 180.f,  240.f };
-		if (HitCurve(point, {-160.f, -16.f }) && right.y == -1.f && up.x == -1.f) return { 360.f,   80.f };
+		if (HitCurve(point, {-160.f, -16.f }) && right.y == -1.f && up.x == -1.f) return { 360.f,   90.f };
 	}
 	return DogRotationTarget();
 }

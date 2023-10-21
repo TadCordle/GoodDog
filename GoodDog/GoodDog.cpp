@@ -539,7 +539,7 @@ int main()
 			if (IsKeyPressed(KeyboardKey::KEY_KP_6) || IsKeyPressed(KeyboardKey::KEY_SIX))    editor.UpdatePlacing(ATCameraZone);
 			if (IsKeyPressed(KeyboardKey::KEY_KP_7) || IsKeyPressed(KeyboardKey::KEY_SEVEN))  editor.UpdatePlacing(ATPrompt);
 			if (IsKeyPressed(KeyboardKey::KEY_KP_8) || IsKeyPressed(KeyboardKey::KEY_EIGHT))  editor.UpdatePlacing(ATItem);
-			if (IsKeyPressed(KeyboardKey::KEY_KP_9) || IsKeyPressed(KeyboardKey::KEY_NINE))   editor.UpdatePlacing(ATCheckpoint);
+			if (IsKeyPressed(KeyboardKey::KEY_KP_9) || IsKeyPressed(KeyboardKey::KEY_NINE)) { editor.UpdatePlacing(ATCheckpoint); editor.v5 = 0.f; }
 
 			if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_RIGHT))
 			{
