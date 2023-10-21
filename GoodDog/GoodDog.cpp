@@ -114,6 +114,7 @@ int main()
 	bool hasHat = false;
 	bool hasBall = false;
 	bool teleported = false;
+	float ballTimer = 0.f;
 
 	double hopTimer = -HOP_TIMER / 2.f;
 	int frame = 0;
@@ -474,15 +475,15 @@ int main()
 			// Winning
 			if (hasBall)
 			{
-				if (pos.x < 22584.f && !teleported)
-				//if (pos.x > 1400.f && !teleported)
+				ballTimer += dt;
+				if (ballTimer > 2.78f && !teleported)
 				{
 					dogFlipped = true;
 					pos = { 1400.f, 540.f };
 					teleported = true;
 				}
 
-				if (teleported && pos.x <= 672.f)
+				if (teleported && pos.x <= 690.f)
 				{
 					ballYSpeed = 0.f;
 					frame = 0;
@@ -610,7 +611,6 @@ int main()
 				else
 					editor.placingPos.x = other.x;
 			};
-			printf("%f, %f\n", editor.placingPos.x, editor.placingPos.y);
 
 			// Select item
 			if (IsKeyPressed(KeyboardKey::KEY_KP_0) || IsKeyPressed(KeyboardKey::KEY_ZERO))   editor.UpdatePlacing(ATNone);
@@ -1070,12 +1070,12 @@ int main()
 			// Items
 			if (hasSunglasses)
 			{
-				Vector2 eyesPos = Vector2Add(Vector2Scale(dogRight, dogFlipped ? 26.f : 48.f), Vector2Scale(dogUp, 28.f - hopOffset + (frame == 2 ? 29.f : 0.f)));
+				Vector2 eyesPos = Vector2Add(Vector2Scale(dogRight, dogFlipped ? 26.f : 48.f), Vector2Scale(dogUp, 28.f - hopOffset + (frame == 0 ? 32 : (frame == 2 ? 29.f : 0.f))));
 				dogOutline.Draw(texItems[0], Vector2Add(pos, eyesPos), { 0.75f, 0.75f }, dogAngle, dogFlipped, true);
 			}
 			if (hasHat)
 			{
-				Vector2 headPos = Vector2Add(Vector2Scale(dogRight, dogFlipped ? 24.f : 46.f), Vector2Scale(dogUp, 90.f - hopOffset + (frame == 2 ? 29.f : 0.f)));
+				Vector2 headPos = Vector2Add(Vector2Scale(dogRight, dogFlipped ? 24.f : 46.f), Vector2Scale(dogUp, 90.f - hopOffset + (frame == 0 ? 32 : (frame == 2 ? 29.f : 0.f))));
 				dogOutline.Draw(texItems[1], Vector2Add(pos, headPos), { 0.75f, 0.75f }, dogAngle, dogFlipped, true);
 			}
 

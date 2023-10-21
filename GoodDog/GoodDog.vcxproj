@@ -144,11 +144,17 @@
     <Content Include="resources\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="editor.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GoodDog.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\dog_icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="editor.txt" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,85 @@
+Hello! A couple things to note if you want to use the level editor:
+
+- I made the level editor mostly for myself, in a very short amount of time. So apologies for any jankiness.
+- The level file is saved in the "resources" folder as "level.txt". In desparate times, you can edit this
+  file with a text editor to fix things.
+- Saving (ctrl+s) will overwrite whatever "level.txt" is currently in the resources folder (which is also 
+  the level that gets loaded when the game boots). So if you want to start a new level, make sure to move
+  or rename the existing level.txt first.
+- The win condition is pretty hardcoded, so for best results, build levels with similar start/end conditions
+  to the base game (i.e. flat, open areas for the start screen and ball screens)
+
+If you make any cool levels please do share them!
+
+Controls
+- F5:		Toggle editor/play
+- F6:		Enter play mode from beginning
+- Ctrl+s	Save
+
+- Middle click:	 Move editor camera
+- Scroll wheel:  Zoom
+
+- 1:	Equip floor
+- 2:	Equip curve
+- 3:	Equip elevator
+- 4:	Equip danger block
+- 5:	Equip reverser
+- 6:	Equip camera trigger
+- 7:	Equip control prompt
+- 8:	Equip item
+- 9:	Equip checkpoint
+- 0:	Unequip
+
+- Left click:	Place equipped object
+- Right click:	Delete hovered object
+
+Each object type has specific creation steps.
+
+Floor:
+	1st click: Set start point
+	2nd click: Set end point
+
+Curve:
+	Right click to rotate
+	Left click to stamp the curve down
+
+Elevator:
+	1st click: Set start point
+	2nd click: Set end point
+	3rd click: Set position start point moves to (hold left shift to align with axis)
+	4th click: Set position end point moves to (hold left shift to align with axis, hold left shift + left ctrl
+			to align with start point's target position)
+	When the question mark appears, press a keyboard key to set the key used to move it
+
+Danger block:
+	1st click: Set top left corner
+	2nd click: Set bottom right corner
+	3rd click: Set position the block moves to (hold left shift to align with axis)
+	When the question mark appears, press a keyboard key or click the mouse to set the key used to move it
+		(mouse click only works on danger blocks, not elevators/reversers, because I'm lazy)
+
+Reverser:
+	Right click to rotate
+	1st click: Set position
+	2nd click: Set position it moves to (hold left shift to align with axis)
+	When the question mark appears, press a keyboard key to set the key used to move it
+
+Camera trigger:
+	1st click: Set top left corner of trigger box
+	2nd click: Set bottom right corner of trigger box
+	Use normal editor controls to choose a camera position/zoom
+	3rd click: Save current camera settings to camera trigger
+
+Control prompt:
+	Click to set position of prompt
+	When the question mark appears, press a keyboard key or click the mouse to set the displayed button
+
+Item:
+	Right click to choose item (sunglasses, hat, or ball)
+	Left click to place item
+
+Checkpoint:
+	1st click: Choose trigger position/spawn position
+	2nd click: Choose direction dog faces after respawn
+
+Some properties of these objects (e.g. elevator travel time) can only be changed by editing level.txt directly, so sorry about that.
