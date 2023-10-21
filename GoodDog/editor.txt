@@ -1,7 +1,7 @@
 Hello! A couple things to note if you want to use the level editor:
 
 - I made the level editor mostly for myself, in a very short amount of time. So apologies for any jankiness.
-- The level file is saved in the "resources" folder as "level.txt". In desparate times, you can edit this
+- The level file is saved in the "resources" folder as "level.txt". In desperate times, you can edit this
   file with a text editor to fix things.
 - Saving (ctrl+s) will overwrite whatever "level.txt" is currently in the resources folder (which is also 
   the level that gets loaded when the game boots). So if you want to start a new level, make sure to move
@@ -31,7 +31,7 @@ Controls
 - 0:	Unequip
 
 - Left click:	Place equipped object
-- Right click:	Delete hovered object
+- Right click:	Delete hovered object (unless you have curve, reverser, or item equipped)
 
 Each object type has specific creation steps.
 
