@@ -5,6 +5,9 @@ int main()
 	InitWindow(1280, 720, "Good Dog");
 	SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
 
+	Image icon = LoadImage("resources/dog_icon.png");
+	SetWindowIcon(icon);
+
 	InitAudioDevice();
 
 	Music music = LoadMusicStream("resources/music.wav");
@@ -1199,6 +1202,7 @@ int main()
 	UnloadMusicStream(music);
 	
 	UnloadFont(font);
+	UnloadImage(icon);
 	
 	CloseWindow();
 
