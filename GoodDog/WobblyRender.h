@@ -70,4 +70,4 @@ struct WobblyRectangle
 };
 
 void DrawPaintLine(Texture2D& paintTex, Vector2 start, Vector2 end, bool lightning);
-void DrawButtonText(Font& font, Vector2 position, int button, bool lightning);
+void DrawButtonText(Font& font, Texture& cursorTex, Vector2 position, int button, bool lightning);

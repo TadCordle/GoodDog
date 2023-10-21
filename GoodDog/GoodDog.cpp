@@ -1,5 +1,7 @@
 #include "Game.h"
 
+#define PLAY_MUSIC 0
+
 int main()
 {
 	InitWindow(1280, 720, "Good Dog");
@@ -11,7 +13,7 @@ int main()
 	InitAudioDevice();
 
 	Music music = LoadMusicStream("resources/music.wav");
-	SetMusicVolume(music, 0.8f);
+	SetMusicVolume(music, PLAY_MUSIC ? 0.8f : 0.f);
 
 	Sound sfxThrow = LoadSound("resources/throw.wav");
 	Sound sfxWoof = LoadSound("resources/woof.wav");
@@ -57,6 +59,7 @@ int main()
 	Texture2D texCurveSolid = LoadTexture("resources/curve_solid.png");
 	Texture2D texCurveOutline = LoadTexture("resources/curve_outline.png");
 	Texture2D texLightning = LoadTexture("resources/lightning.png");
+	Texture2D texCursor = LoadTexture("resources/cursor.png");
 	Texture2D texBG = LoadTexture("resources/bg.png");
 
 	WobblyTexture dogOutline, dogBack;
@@ -174,7 +177,7 @@ int main()
 		if (state != EDITOR)
 		{
 			for (int i = 0; i < game->dangerBlocksCount; i++)
-				game->dangerBlocks[i].Update(dt, WALL_WOBBLE_RATE);
+				game->dangerBlocks[i].Update(dt, WALL_WOBBLE_RATE, game->camera);
 			for (int i = 0; i < game->floorsCount; i++)
 				game->floors[i].Update(dt, WALL_WOBBLE_RATE);
 			for (int i = 0; i < game->elevatorsCount; i++)
@@ -572,14 +575,6 @@ int main()
 						return false;
 					};
 
-					auto IsMouseOverRectangle = [&](Vector2 pos, Vector2 size)
-					{
-						return editor.placingPos.x < pos.x + size.x / 2.f &&
-							   editor.placingPos.x > pos.x - size.x / 2.f &&
-							   editor.placingPos.y < pos.y + size.y / 2.f &&
-							   editor.placingPos.y > pos.y - size.y / 2.f;
-					};
-
 					for (int i = 0; i < game->floorsCount; i++)
 					{
 						if (IsMouseOverLine(game->floors[i].start, game->floors[i].end))
@@ -594,7 +589,7 @@ int main()
 					if (!removedSomething)
 					for (int i = 0; i < game->curvesCount; i++)
 					{
-						if (IsMouseOverRectangle(game->curves[i].pos, { 128.f, 128.f }))
+						if (IsMouseOverRectangle(editor.placingPos, game->curves[i].pos, { 128.f, 128.f }))
 						{
 							game->curves[i] = game->curves[game->curvesCount - 1];
 							game->curvesCount--;
@@ -618,7 +613,7 @@ int main()
 					if (!removedSomething)
 					for (int i = 0; i < game->dangerBlocksCount; i++)
 					{
-						if (IsMouseOverRectangle(game->dangerBlocks[i].pos1, game->dangerBlocks[i].dimensions))
+						if (IsMouseOverRectangle(editor.placingPos, game->dangerBlocks[i].pos1, game->dangerBlocks[i].dimensions))
 						{
 							game->dangerBlocks[i] = game->dangerBlocks[game->dangerBlocksCount - 1];
 							game->dangerBlocksCount--;
@@ -631,7 +626,7 @@ int main()
 					for (int i = 0; i < game->reversersCount; i++)
 					{
 						Vector2 dimensions = (game->reversers[i].dir == Left || game->reversers[i].dir == Right) ? Vector2{ 60.f, 220.f } : Vector2{ 220.f, 60.f };
-						if (IsMouseOverRectangle(game->reversers[i].pos1, dimensions))
+						if (IsMouseOverRectangle(editor.placingPos, game->reversers[i].pos1, dimensions))
 						{
 							game->reversers[i] = game->reversers[game->reversersCount - 1];
 							game->reversersCount--;
@@ -643,7 +638,7 @@ int main()
 					if (!removedSomething)
 					for (int i = 0; i < game->promptsCount; i++)
 					{
-						if (IsMouseOverRectangle(game->prompts[i].pos, { 64.f, 64.f }))
+						if (IsMouseOverRectangle(editor.placingPos, game->prompts[i].pos, { 64.f, 64.f }))
 						{
 							game->prompts[i] = game->prompts[game->promptsCount - 1];
 							game->promptsCount--;
@@ -655,7 +650,7 @@ int main()
 					if (!removedSomething)
 					for (int i = 0; i < game->itemsCount; i++)
 					{
-						if (IsMouseOverRectangle(game->items[i].pos, { 128.f, 128.f }))
+						if (IsMouseOverRectangle(editor.placingPos, game->items[i].pos, { 128.f, 128.f }))
 						{
 							game->items[i] = game->items[game->itemsCount - 1];
 							game->itemsCount--;
@@ -667,7 +662,7 @@ int main()
 					if (!removedSomething)
 					for (int i = 0; i < game->checkpointsCount; i++)
 					{
-						if (IsMouseOverRectangle(game->checkpoints[i].pos, { 192.f, 192.f }))
+						if (IsMouseOverRectangle(editor.placingPos, game->checkpoints[i].pos, { 192.f, 192.f }))
 						{
 							game->checkpoints[i] = game->checkpoints[game->checkpointsCount - 1];
 							game->checkpointsCount--;
@@ -963,9 +958,9 @@ int main()
 			BeginMode2D(game->camera);
 
 			for (int i = 0; i < game->promptsCount; i++)
-				game->prompts[i].Draw(font, lightning);
+				game->prompts[i].Draw(font, texCursor, lightning);
 			for (int i = 0; i < game->dangerBlocksCount; i++)
-				game->dangerBlocks[i].Draw(texLine, texPaintGray, font, lightning);
+				game->dangerBlocks[i].Draw(texLine, texPaintGray, font, texCursor, lightning);
 			for (int i = 0; i < game->curvesCount; i++)
 				game->curves[i].Draw(texCurveOutline, texCurveSolid, lightning);
 			for (int i = 0; i < game->floorsCount; i++)
@@ -1061,7 +1056,7 @@ int main()
 						{
 							DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.v3.x, (int)editor.v3.y, GREEN);
 							DrawLine((int)editor.v2.x, (int)editor.v2.y, (int)editor.v4.x, (int)editor.v4.y, GREEN);
-							DrawButtonText(font, Vector2Scale(Vector2Add(editor.v1, editor.v2), 0.5f), (int)Button::QMark, false);
+							DrawButtonText(font, texCursor, Vector2Scale(Vector2Add(editor.v1, editor.v2), 0.5f), (int)Button::QMark, false);
 						}
 					}
 					break;
@@ -1076,7 +1071,7 @@ int main()
 						Vector2 pos = Vector2Scale(Vector2Add(editor.v1, botRight), 0.5f);
 						Vector2 size = Vector2Subtract(botRight, editor.v1);
 						DangerBlock temp(pos, {}, size, editor.placingStep == 3 ? Button::QMark : Button::None);
-						temp.Draw(texLine, texPaintGray, font, false);
+						temp.Draw(texLine, texPaintGray, font, texCursor, false);
 
 						if (editor.placingStep > 1)
 						{
@@ -1101,7 +1096,7 @@ int main()
 					if (editor.placingStep == 2)
 					{
 						DrawLine((int)editor.v1.x, (int)editor.v1.y, (int)editor.v2.x, (int)editor.v2.y, GREEN);
-						DrawButtonText(font, editor.v1, (int)Button::QMark, false);
+						DrawButtonText(font, texCursor, editor.v1, (int)Button::QMark, false);
 					}
 					break;
 				}
@@ -1123,7 +1118,7 @@ int main()
 					if (editor.placingStep == 0)
 						DrawRectangle((int)editor.placingPos.x - 32, (int)editor.placingPos.y - 32, 64, 64, WHITE);
 					else
-						DrawButtonText(font, editor.v1, (int)Button::QMark, false);
+						DrawButtonText(font, texCursor, editor.v1, (int)Button::QMark, false);
 					break;
 				}
 				case ATItem:
@@ -1188,6 +1183,7 @@ int main()
 	UnloadTexture(texReverserArrows);
 	UnloadTexture(texCurveSolid);
 	UnloadTexture(texCurveOutline);
+	UnloadTexture(texCursor);
 	UnloadTexture(texBG);
 
 	for (int i = 0; i < 7; i++)

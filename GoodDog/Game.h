@@ -13,6 +13,7 @@ enum Button {
 	None = 0,
 	Cancel = 1,
 	QMark = 2,
+	Mouse = 3,
 	A = KEY_A,
 	B = KEY_B,
 	C = KEY_C,
@@ -96,11 +97,12 @@ struct DangerBlock
 	Vector2 dimensions = {};
 	float currentTravelTime = 0.f;
 	Button button;
+	bool held = false;
 
 	DangerBlock() {}
 	DangerBlock(Vector2 _pos1, Vector2 _pos2, Vector2 _dimensions, Button _button);
-	void Update(float dt, float wobbleRate);
-	void Draw(Texture2D& lineTex, Texture2D& paintTex, Font& font, bool lightning);
+	void Update(float dt, float wobbleRate, Camera2D camera);
+	void Draw(Texture2D& lineTex, Texture2D& paintTex, Font& font, Texture2D& cursorTex, bool lightning);
 
 	inline Vector2 GetCurrentPos() { float t = currentTravelTime / 0.2f; return Vector2Lerp(pos1, pos2, t); }
 };
@@ -162,7 +164,7 @@ struct Prompt
 
 	Prompt() {}
 	Prompt(Vector2 _pos, Button _button);
-	void Draw(Font& font, bool lightning);
+	void Draw(Font& font, Texture2D& cursorTex, bool lightning);
 };
 
 enum ItemType
@@ -272,3 +274,5 @@ struct EditorState
 
 	void UpdatePlacing(AssetType at) { placingAsset = at; placingStep = 0; };
 };
+
+bool IsMouseOverRectangle(Vector2 cursor, Vector2 pos, Vector2 size);

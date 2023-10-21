@@ -285,7 +285,7 @@ void Elevator::Update(float dt, float wobbleRate)
 	line1.Update(dt, wobbleRate);
 	line2.Update(dt, wobbleRate);
 
-	currentTravelTime += dt * (IsKeyDown((int)button) ? 1 : -1);
+	if (button != Button::Mouse) currentTravelTime += dt * (IsKeyDown((int)button) ? 1 : -1);
 	if (currentTravelTime < 0.f) currentTravelTime = 0.f;
 	if (currentTravelTime > travelTime) currentTravelTime = travelTime;
 }
@@ -311,23 +311,39 @@ DangerBlock::DangerBlock(Vector2 _pos1, Vector2 _pos2, Vector2 _dimensions, Butt
 	wobblyRectangle = WobblyRectangle();
 }
 
-void DangerBlock::Update(float dt, float wobbleRate)
+void DangerBlock::Update(float dt, float wobbleRate, Camera2D camera)
 {
 	wobblyRectangle.Update(dt, wobbleRate);
-
-	currentTravelTime += dt * (IsKeyDown((int)button) ? 1 : -1);
+	if (button != Button::Mouse)
+		currentTravelTime += dt * (IsKeyDown((int)button) ? 1 : -1);
+	else
+	{
+		if (held)
+		{
+			if (IsMouseButtonUp(MouseButton::MOUSE_BUTTON_LEFT))
+				held = false;
+		}
+		else
+		{
+			bool mousePressed = IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT);
+			Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
+			if (mousePressed && IsMouseOverRectangle(mousePos, GetCurrentPos(), dimensions))
+				held = true;
+		}
+		currentTravelTime += dt * (held ? 1 : -1);
+	}
 	if (currentTravelTime < 0.f)  currentTravelTime = 0.f;
 	if (currentTravelTime > 0.2f) currentTravelTime = 0.2f;
 }
 
-void DangerBlock::Draw(Texture2D& lineTex, Texture2D& paintTex, Font& font, bool lightning)
+void DangerBlock::Draw(Texture2D& lineTex, Texture2D& paintTex, Font& font, Texture& cursorTex, bool lightning)
 {
 	Vector2 p = GetCurrentPos();
 	Vector2 topLeft  = { p.x - dimensions.x / 2.f, p.y - dimensions.y / 2.f };
 	Vector2 botRight = { p.x + dimensions.x / 2.f, p.y + dimensions.y / 2.f };
 	wobblyRectangle.Draw(lineTex, paintTex, topLeft, botRight, lightning);
 	if (button != Button::None && button != Button::Cancel)
-		DrawButtonText(font, p, (int)button, lightning);
+		DrawButtonText(font, cursorTex, p, (int)button, lightning);
 }
 
 Reverser::Reverser(Vector2 _pos1, Vector2 _pos2, Direction _dir, Button _button)
@@ -352,7 +368,7 @@ void Reverser::Update(float dt, float wobbleRate)
 			enabled = 0.f;
 	}
 
-	currentTravelTime += dt * (IsKeyDown((int)button) ? 1 : -1);
+	if (button != Button::Mouse)  currentTravelTime += dt * (IsKeyDown((int)button) ? 1 : -1);
 	if (currentTravelTime < 0.f)  currentTravelTime = 0.f;
 	if (currentTravelTime > 0.3f) currentTravelTime = 0.3f;
 }
@@ -459,9 +475,9 @@ Prompt::Prompt(Vector2 _pos, Button _button)
 	button = _button;
 }
 
-void Prompt::Draw(Font& font, bool lightning)
+void Prompt::Draw(Font& font, Texture& cursorTex, bool lightning)
 {
-	DrawButtonText(font, pos, (int)button, lightning);
+	DrawButtonText(font, cursorTex, pos, (int)button, lightning);
 }
 
 Item::Item(Vector2 _pos, ItemType _itemType)
@@ -512,6 +528,7 @@ Button GetButtonFromKeyPressed()
 	if (IsKeyPressed(KeyboardKey::KEY_X)) return Button::X;
 	if (IsKeyPressed(KeyboardKey::KEY_Y)) return Button::Y;
 	if (IsKeyPressed(KeyboardKey::KEY_Z)) return Button::Z;
+	if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT)) return Button::Mouse;
 	return Button::None;
 }
 
@@ -544,5 +561,14 @@ Button GetButtonFromKeyReleased()
 	if (IsKeyReleased(KeyboardKey::KEY_X)) return Button::X;
 	if (IsKeyReleased(KeyboardKey::KEY_Y)) return Button::Y;
 	if (IsKeyReleased(KeyboardKey::KEY_Z)) return Button::Z;
+	if (IsMouseButtonReleased(MouseButton::MOUSE_BUTTON_LEFT)) return Button::Mouse;
 	return Button::None;
 }
+
+bool IsMouseOverRectangle(Vector2 cursor, Vector2 pos, Vector2 size)
+{
+	return cursor.x < pos.x + size.x / 2.f &&
+		   cursor.x > pos.x - size.x / 2.f &&
+		   cursor.y < pos.y + size.y / 2.f &&
+		   cursor.y > pos.y - size.y / 2.f;
+};

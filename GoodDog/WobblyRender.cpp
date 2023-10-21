@@ -148,9 +148,14 @@ void DrawQuestionMark(Font& font, Vector2 position)
 	DrawTextEx(font, str, Vector2Subtract(position, Vector2Scale(fontSize, 0.5f)), 80, 0, MAGENTA);
 }
 
-void DrawButtonText(Font& font, Vector2 position, int button, bool lightning)
+void DrawButtonText(Font& font, Texture& cursorTex, Vector2 position, int button, bool lightning)
 {
-	if (button < 65)
+	if (button == 3)
+	{
+		Vector2 pos = Vector2Subtract(position, { 64.f, 64.f });
+		DrawTexture(cursorTex, (int)pos.x, (int)pos.y, lightning ? BLACK : WHITE);
+	}
+	else if (button < 65)
 		DrawQuestionMark(font, position);
 	else
 	{
