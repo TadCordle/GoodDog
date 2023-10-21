@@ -47,6 +47,16 @@ int main()
 		LoadTexture("resources/hat.png"),
 		LoadTexture("resources/ball.png")
 	};
+	Texture2D texGuyOutline[] = {
+		LoadTexture("resources/guy_neutral_outline.png"),
+		LoadTexture("resources/guy_prethrow_outline.png"),
+		LoadTexture("resources/guy_throw_outline.png")
+	};
+	Texture2D texGuyBack[] = {
+		LoadTexture("resources/guy_neutral_fill.png"),
+		LoadTexture("resources/guy_prethrow_fill.png"),
+		LoadTexture("resources/guy_throw_fill.png")
+	};
 	Texture2D texLine = LoadTexture("resources/line.png");
 	Texture2D texPaintBlue = LoadTexture("resources/paint_blue.png");
 	Texture2D texPaintGray = LoadTexture("resources/paint_gray.png");
@@ -63,13 +73,16 @@ int main()
 	Texture2D texBG = LoadTexture("resources/bg.png");
 
 	WobblyTexture dogOutline, dogBack;
+	WobblyTexture guyOutline, guyBack;
 
 	Font font = LoadFontEx("resources/GamjaFlower-Regular.ttf", 80, 0, 0);
 	SetTextureFilter(font.texture, TEXTURE_FILTER_POINT);
+	const char* fetchText = "Fetch!";
 	const char* loseText = "Bad dog :(";
 	const char* loseDetailsText = "'R' to restart from beginning\n'C' to restart from checkpoint";
 	const char* winText = "Good dog :)";
 	const char* winDetailsText = "'F5' to use level editor\nCheck editor.txt for instructions";
+	float fetchTextWidth = MeasureTextEx(font, fetchText, 80, 0).x;
 	float loseTextWidth = MeasureTextEx(font, loseText, 80, 0).x;
 	Vector2 loseDetailsSize = MeasureTextEx(font, loseDetailsText, 40, 0);
 	float winTextWidth = MeasureTextEx(font, winText, 80, 0).x;
@@ -108,6 +121,11 @@ int main()
 
 	// Cutscene state
 	float cutsceneTimer = 0.f;
+	int guyFrame = 0;
+	bool drawFetchText = false;
+	float ballPos = -1.f;
+	bool playedThrowSound = false;
+	bool playedWoofSound = false;
 
 	float lightningFlashTime = 0.f;
 	auto LightningFlash = [&]()
@@ -224,29 +242,46 @@ int main()
 		case CUTSCENE:
 		{
 			cutsceneTimer += dt;
-			if (cutsceneTimer < 0.5f)
+			if (cutsceneTimer < 1.f)
 			{
-				//printf("Waiting\n");
+				// Waiting
 			}
-			else if (cutsceneTimer < 1.f)
+			else if (cutsceneTimer < 2.f)
 			{
-				//printf("Pre-throw\n");
+				// Pre-throw
+				guyFrame = 1;
 			}
-			else if (cutsceneTimer < 1.5f)
+			else if (cutsceneTimer < 3.7f)
 			{
-				//printf("Throw\n");
-				if (!IsSoundPlaying(sfxThrow))
+				// Throw;
+				if (ballPos < 0.f)
+					ballPos = 0.f;
+				ballPos += dt;
+				guyFrame = 2;
+				if (!playedThrowSound)
+				{
+					playedThrowSound = true;
 					PlaySound(sfxThrow);
+				}
 				dogFlipped = false;
 			}
-			else if (cutsceneTimer < 2.0f)
+			else if (cutsceneTimer < 5.7f)
 			{
-				//printf("Fetch!\n");
-				if(!IsSoundPlaying(sfxWoof))
+				// Fetch!
+				ballPos = -1.f;
+				drawFetchText = true;
+				guyFrame = 0;
+				if (!playedWoofSound)
+				{
+					playedWoofSound = true;
 					PlaySound(sfxWoof);
+				}
 			}
 			else
 			{
+				playedThrowSound = false;
+				playedWoofSound = false;
+				drawFetchText = false;
 				PlayMusicStream(music);
 				frame = 2;
 				state = GOING;
@@ -947,6 +982,8 @@ int main()
 
 		dogBack.Update(dt, DOG_WOBBLE_RATE);
 		dogOutline.Update(dt, DOG_WOBBLE_RATE);
+		guyBack.Update(dt, WALL_WOBBLE_RATE);
+		guyOutline.Update(dt, WALL_WOBBLE_RATE);
 		
 		BeginDrawing();
 		{
@@ -973,8 +1010,6 @@ int main()
 				game->elevators[i].Draw(texLine, texPaintLightGreen, lightning);
 			for (int i = 0; i < game->reversersCount; i++)
 				game->reversers[i].Draw(texReverserBackEnabled, texReverserBackDisabled, texReverserOutline, texReverserArrows, lightning);
-			for (int i = 0; i < game->itemsCount; i++)
-				game->items[i].Draw(texItems);
 
 			Vector2 offsetPos = Vector2Add(pos, Vector2Scale(dogUp, -hopOffset));
 			Vector2 drawPos = Vector2Add(offsetPos, Vector2Scale(dogRight, dogFlipped ? -12.f : 12.f));
@@ -982,6 +1017,13 @@ int main()
 			dogOutline.Draw(state == LOSE ? texDogLose : texDogOutline[frame], drawPos, { 0.75f, 0.75f }, dogAngle, dogFlipped, true);
 			//DrawRectangleLines((int)pos.x - 8.f, (int)pos.y - 8.f, 16, 16, RED);
 			
+			Vector2 guyDrawPos = { 332.f, 488.f };
+			guyBack.Draw(texGuyBack[guyFrame], guyDrawPos, { 1.f, 1.f }, 0.f, false, false);
+			guyOutline.Draw(texGuyOutline[guyFrame], guyDrawPos, { 1.f, 1.f }, 0.f, false, true);
+
+			if (ballPos >= 0.f)
+				DrawTexture(texItems[2], 450 + (int)(ballPos * 900), 380, WHITE);
+
 			// Items
 			if (hasSunglasses)
 			{
@@ -993,6 +1035,9 @@ int main()
 				Vector2 headPos = Vector2Add(Vector2Scale(dogRight, dogFlipped ? 24.f : 46.f), Vector2Scale(dogUp, 90.f - hopOffset + (frame == 2 ? 29.f : 0.f)));
 				dogOutline.Draw(texItems[1], Vector2Add(pos, headPos), { 0.75f, 0.75f }, dogAngle, dogFlipped, true);
 			}
+
+			for (int i = 0; i < game->itemsCount; i++)
+				game->items[i].Draw(texItems);
 
 			// Draw edits in progress
 			if (state == EDITOR)
@@ -1152,6 +1197,12 @@ int main()
 
 			if (lightningFlashTime > 0.2f)
 				DrawTexture(texLightning, 200, 0, WHITE);
+
+			if (drawFetchText)
+			{
+				DrawTextEx(font, fetchText, { 640.f - fetchTextWidth / 2, 320.f }, 80, 0, BLACK);
+				DrawTextEx(font, fetchText, { 643.f - fetchTextWidth / 2, 323.f }, 80, 0, WHITE);
+			}
 
 			if (state == LOSE)
 			{
