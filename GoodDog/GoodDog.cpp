@@ -14,6 +14,8 @@ int main()
 
 	Music music = LoadMusicStream("resources/music.wav");
 	SetMusicVolume(music, PLAY_MUSIC ? 0.8f : 0.f);
+	Music hihatMusic = LoadMusicStream("resources/music_hihat.wav");
+	SetMusicVolume(hihatMusic, PLAY_MUSIC ? 0.8f : 0.f);
 
 	Sound sfxThrow = LoadSound("resources/throw.wav");
 	Sound sfxWoof = LoadSound("resources/woof.wav");
@@ -28,7 +30,7 @@ int main()
 	};
 	Sound sfxReverse = LoadSound("resources/reverse.wav");
 	Sound sfxLose = LoadSound("resources/lose.wav");
-	Sound sfxWin = LoadSound("resources/win.wav");
+	Sound sfxWin = LoadSound("resources/cheer.wav");
 	Sound sfxThunder = LoadSound("resources/thunder.wav");
 
 	Texture2D texDogOutline[] = {
@@ -111,6 +113,7 @@ int main()
 	bool hasSunglasses = false;
 	bool hasHat = false;
 	bool hasBall = false;
+	bool teleported = false;
 
 	double hopTimer = -HOP_TIMER / 2.f;
 	int frame = 0;
@@ -123,9 +126,10 @@ int main()
 	float cutsceneTimer = 0.f;
 	int guyFrame = 0;
 	bool drawFetchText = false;
-	float ballPos = -1.f;
+	Vector2 ballPos = { -1.f, 0.f };
 	bool playedThrowSound = false;
 	bool playedWoofSound = false;
+	float ballYSpeed = 0.f;
 
 	float lightningFlashTime = 0.f;
 	auto LightningFlash = [&]()
@@ -213,11 +217,14 @@ int main()
 		// Update camera when you hit a camera zone
 		if (state != EDITOR)
 		{
-			for (int i = 0; i < game->cameraZonesCount; i++)
+			if (state != LOSE)
 			{
-				CameraZone& cameraZone = game->cameraZones[i];
-				if (cameraZone.ContainsPoint(pos))
-					game->camera = cameraZone.params;
+				for (int i = 0; i < game->cameraZonesCount; i++)
+				{
+					CameraZone& cameraZone = game->cameraZones[i];
+					if (cameraZone.ContainsPoint(pos))
+						game->camera = cameraZone.params;
+				}
 			}
 
 			// Play sound when you hit a key
@@ -254,9 +261,9 @@ int main()
 			else if (cutsceneTimer < 3.7f)
 			{
 				// Throw;
-				if (ballPos < 0.f)
-					ballPos = 0.f;
-				ballPos += dt;
+				if (ballPos.x < 0.f)
+					ballPos.x = 0.f;
+				ballPos.x += dt;
 				guyFrame = 2;
 				if (!playedThrowSound)
 				{
@@ -268,7 +275,7 @@ int main()
 			else if (cutsceneTimer < 5.7f)
 			{
 				// Fetch!
-				ballPos = -1.f;
+				ballPos.x = -1.f;
 				drawFetchText = true;
 				guyFrame = 0;
 				if (!playedWoofSound)
@@ -464,12 +471,45 @@ int main()
 				}
 			}
 
+			// Winning
+			if (hasBall)
+			{
+				if (pos.x < 22584.f && !teleported)
+				//if (pos.x > 1400.f && !teleported)
+				{
+					dogFlipped = true;
+					pos = { 1400.f, 540.f };
+					teleported = true;
+				}
+
+				if (teleported && pos.x <= 672.f)
+				{
+					ballYSpeed = 0.f;
+					frame = 0;
+					state = WIN;
+					ballPos = Vector2Subtract(pos, { 120.f, 32.f });
+					PlaySound(sfxWin);
+					PlayMusicStream(hihatMusic);
+				}
+			}
+
 			break;
 		}
 		case WIN:
 		{
-			PlaySound(sfxWin);
-			// TODO
+			hopOffset = 0.f;
+			if (ballPos.y < 532.f)
+			{
+				ballYSpeed += 600.f * dt;
+				ballPos.y += ballYSpeed * dt;
+				ballPos.x -= 400.f * dt;
+			}
+			else
+			{
+				ballPos.y = 532.f;
+			}
+
+			UpdateMusicStream(hihatMusic);
 			break;
 		}
 		case LOSE:
@@ -570,6 +610,7 @@ int main()
 				else
 					editor.placingPos.x = other.x;
 			};
+			printf("%f, %f\n", editor.placingPos.x, editor.placingPos.y);
 
 			// Select item
 			if (IsKeyPressed(KeyboardKey::KEY_KP_0) || IsKeyPressed(KeyboardKey::KEY_ZERO))   editor.UpdatePlacing(ATNone);
@@ -1021,8 +1062,10 @@ int main()
 			guyBack.Draw(texGuyBack[guyFrame], guyDrawPos, { 1.f, 1.f }, 0.f, false, false);
 			guyOutline.Draw(texGuyOutline[guyFrame], guyDrawPos, { 1.f, 1.f }, 0.f, false, true);
 
-			if (ballPos >= 0.f)
-				DrawTexture(texItems[2], 450 + (int)(ballPos * 900), 380, WHITE);
+			if (ballPos.x >= 0.f && state == CUTSCENE)
+				DrawTexture(texItems[2], 450 + (int)(ballPos.x * 900), 340, WHITE);
+			else if (state == WIN)
+				DrawTexture(texItems[2], (int)ballPos.x, (int)ballPos.y, WHITE);
 
 			// Items
 			if (hasSunglasses)
