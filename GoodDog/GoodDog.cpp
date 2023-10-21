@@ -67,9 +67,13 @@ int main()
 	Font font = LoadFontEx("resources/GamjaFlower-Regular.ttf", 80, 0, 0);
 	SetTextureFilter(font.texture, TEXTURE_FILTER_POINT);
 	const char* loseText = "Bad dog :(";
+	const char* loseDetailsText = "'R' to restart from beginning\n'C' to restart from checkpoint";
 	const char* winText = "Good dog :)";
+	const char* winDetailsText = "'F5' to use level editor\nCheck editor.txt for instructions";
 	float loseTextWidth = MeasureTextEx(font, loseText, 80, 0).x;
+	Vector2 loseDetailsSize = MeasureTextEx(font, loseDetailsText, 40, 0);
 	float winTextWidth = MeasureTextEx(font, winText, 80, 0).x;
+	Vector2 winDetailsSize = MeasureTextEx(font, winDetailsText, 40, 0);
 
 	GameState state = CUTSCENE;
 	GameState prevState = CUTSCENE;
@@ -1153,11 +1157,17 @@ int main()
 			{
 				DrawTextEx(font, loseText, { 640.f - loseTextWidth / 2, 320.f }, 80, 0, BLACK);
 				DrawTextEx(font, loseText, { 643.f - loseTextWidth / 2, 323.f }, 80, 0, WHITE);
+
+				DrawTextEx(font, loseDetailsText, Vector2Subtract({ 640.f, 470.f }, Vector2Scale(loseDetailsSize, 0.5f)), 40, 0, BLACK);
+				DrawTextEx(font, loseDetailsText, Vector2Subtract({ 642.f, 472.f }, Vector2Scale(loseDetailsSize, 0.5f)), 40, 0, WHITE);
 			}
 			else if (state == WIN)
 			{
 				DrawTextEx(font, winText, { 640.f - winTextWidth / 2, 320.f }, 80, 0, BLACK);
 				DrawTextEx(font, winText, { 643.f - winTextWidth / 2, 323.f }, 80, 0, WHITE);
+
+				DrawTextEx(font, winDetailsText, Vector2Subtract({ 640.f, 470.f }, Vector2Scale(winDetailsSize, 0.5f)), 40, 0, BLACK);
+				DrawTextEx(font, winDetailsText, Vector2Subtract({ 642.f, 472.f }, Vector2Scale(winDetailsSize, 0.5f)), 40, 0, WHITE);
 			}
 
 			//DrawFPS(10, 10);
