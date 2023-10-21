@@ -152,7 +152,7 @@ void DrawButtonText(Font& font, Texture& cursorTex, Vector2 position, int button
 {
 	if (button == 3)
 	{
-		Vector2 pos = Vector2Subtract(position, { 64.f, 64.f });
+		Vector2 pos = Vector2Subtract(position, { 40.f, 40.f });
 		DrawTexture(cursorTex, (int)pos.x, (int)pos.y, lightning ? BLACK : WHITE);
 	}
 	else if (button < 65)
