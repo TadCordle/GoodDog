@@ -79,10 +79,11 @@ struct Elevator
 	float travelTime = 0.f;
 	float currentTravelTime = 0.f;
 	Button button;
+	bool held = false;
 
 	Elevator() {}
 	Elevator(Vector2 _start, Vector2 _end, Vector2 _newStart, Vector2 _newEnd, float _travelTime, Button _button);
-	void Update(float dt, float wobbleRate);
+	void Update(float dt, float wobbleRate, Camera2D camera);
 	void Draw(Texture2D& lineTex, Texture2D& paintTex, bool lightning);
 
 	inline Vector2 GetCurrentStart() { float t = currentTravelTime / travelTime; return Vector2Lerp(start, newStart, t); }
@@ -121,13 +122,14 @@ struct Reverser
 	Vector2 pos2 = {};
 	Direction dir;
 	Button button;
+	bool held = false;
 	float enabled = 1.f;
 	float currentTravelTime = 0.f;
 	WobblyTexture texFront, texBack;
 
 	Reverser() {}
 	Reverser(Vector2 _pos1, Vector2 _pos2, Direction _dir, Button _button);
-	void Update(float dt, float wobbleRate);
+	void Update(float dt, float wobbleRate, Camera2D camera);
 	void Draw(Texture2D& texBackEnabled, Texture2D& texBackDisabled, Texture2D& texOutline, Texture2D& texArrows, bool lightning);
 
 	inline Vector2 GetCurrentPos() { float t = currentTravelTime / 0.3f; return Vector2Lerp(pos1, pos2, t); }
@@ -276,3 +278,4 @@ struct EditorState
 };
 
 bool IsMouseOverRectangle(Vector2 cursor, Vector2 pos, Vector2 size);
+bool IsMouseOverLine(Vector2 cursor, Vector2 start, Vector2 end);

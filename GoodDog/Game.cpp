@@ -280,12 +280,28 @@ Elevator::Elevator(Vector2 _start, Vector2 _end, Vector2 _newStart, Vector2 _new
 	line2 = WobblyLine();
 }
 
-void Elevator::Update(float dt, float wobbleRate)
+void Elevator::Update(float dt, float wobbleRate, Camera2D camera)
 {
 	line1.Update(dt, wobbleRate);
 	line2.Update(dt, wobbleRate);
-
-	if (button != Button::Mouse) currentTravelTime += dt * (IsKeyDown((int)button) ? 1 : -1);
+	if (button != Button::Mouse)
+		currentTravelTime += dt * (IsKeyDown((int)button) ? 1 : -1);
+	else
+	{
+		if (held)
+		{
+			if (IsMouseButtonUp(MouseButton::MOUSE_BUTTON_LEFT))
+				held = false;
+		}
+		else
+		{
+			bool mousePressed = IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT);
+			Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
+			if (mousePressed && IsMouseOverLine(mousePos, GetCurrentStart(), GetCurrentEnd()))
+				held = true;
+		}
+		currentTravelTime += dt * (held ? 1 : -1);
+	}
 	if (currentTravelTime < 0.f) currentTravelTime = 0.f;
 	if (currentTravelTime > travelTime) currentTravelTime = travelTime;
 }
@@ -356,7 +372,7 @@ Reverser::Reverser(Vector2 _pos1, Vector2 _pos2, Direction _dir, Button _button)
 	texBack = WobblyTexture();
 }
 
-void Reverser::Update(float dt, float wobbleRate)
+void Reverser::Update(float dt, float wobbleRate, Camera2D camera)
 {
 	texFront.Update(dt, wobbleRate);
 	texBack.Update(dt, wobbleRate);
@@ -368,7 +384,25 @@ void Reverser::Update(float dt, float wobbleRate)
 			enabled = 0.f;
 	}
 
-	if (button != Button::Mouse)  currentTravelTime += dt * (IsKeyDown((int)button) ? 1 : -1);
+	if (button != Button::Mouse)
+		currentTravelTime += dt * (IsKeyDown((int)button) ? 1 : -1);
+	else
+	{
+		if (held)
+		{
+			if (IsMouseButtonUp(MouseButton::MOUSE_BUTTON_LEFT))
+				held = false;
+		}
+		else
+		{
+			bool mousePressed = IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT);
+			Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
+			Vector2 dimensions = (dir == Left || dir == Right) ? Vector2{ 60.f, 220.f } : Vector2{ 220.f, 60.f };
+			if (mousePressed && IsMouseOverRectangle(mousePos, GetCurrentPos(), dimensions))
+				held = true;
+		}
+		currentTravelTime += dt * (held ? 1 : -1);
+	}
 	if (currentTravelTime < 0.f)  currentTravelTime = 0.f;
 	if (currentTravelTime > 0.3f) currentTravelTime = 0.3f;
 }
@@ -571,4 +605,20 @@ bool IsMouseOverRectangle(Vector2 cursor, Vector2 pos, Vector2 size)
 		   cursor.x > pos.x - size.x / 2.f &&
 		   cursor.y < pos.y + size.y / 2.f &&
 		   cursor.y > pos.y - size.y / 2.f;
-};
+}
+
+bool IsMouseOverLine(Vector2 cursor, Vector2 start, Vector2 end)
+{
+	Vector2 floorCenter = Vector2Lerp(start, end, 0.5f);
+	Vector2 floorRight = Vector2Normalize(Vector2Subtract(end, start));
+	Vector2 floorUp = { floorRight.y, -floorRight.x };
+	float mouseXToFloor = Vector2DotProduct(Vector2Subtract(cursor, floorCenter), floorRight);
+	float floorLength = Vector2DotProduct(Vector2Subtract(end, start), floorRight);
+	if (fabs(mouseXToFloor) < fabs(floorLength) / 2.f + 64.f)
+	{
+		Vector2 closestFloorPos = Vector2Lerp(start, end, mouseXToFloor / floorLength + 0.5f);
+		float dist = Vector2DotProduct(Vector2Subtract(cursor, closestFloorPos), floorUp);
+		return abs(dist) < 24.f;
+	}
+	return false;
+}

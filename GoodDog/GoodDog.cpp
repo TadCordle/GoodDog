@@ -208,9 +208,9 @@ int main()
 			for (int i = 0; i < game->floorsCount; i++)
 				game->floors[i].Update(dt, WALL_WOBBLE_RATE);
 			for (int i = 0; i < game->elevatorsCount; i++)
-				game->elevators[i].Update(dt, WALL_WOBBLE_RATE);
+				game->elevators[i].Update(dt, WALL_WOBBLE_RATE, game->camera);
 			for (int i = 0; i < game->reversersCount; i++)
-				game->reversers[i].Update(dt, WALL_WOBBLE_RATE);
+				game->reversers[i].Update(dt, WALL_WOBBLE_RATE, game->camera);
 		}
 
 		Rectangle dogHitBox = { pos.x - 48.f, pos.y - 48.f, 96.f, 96.f };
@@ -639,25 +639,9 @@ int main()
 
 					bool removedSomething = false;
 
-					auto IsMouseOverLine = [&](Vector2 start, Vector2 end)
-					{
-						Vector2 floorCenter = Vector2Lerp(start, end, 0.5f);
-						Vector2 floorRight = Vector2Normalize(Vector2Subtract(end, start));
-						Vector2 floorUp = { floorRight.y, -floorRight.x };
-						float mouseXToFloor = Vector2DotProduct(Vector2Subtract(editor.placingPos, floorCenter), floorRight);
-						float floorLength = Vector2DotProduct(Vector2Subtract(end, start), floorRight);
-						if (fabs(mouseXToFloor) < fabs(floorLength) / 2.f + 64.f)
-						{
-							Vector2 closestFloorPos = Vector2Lerp(start, end, mouseXToFloor / floorLength + 0.5f);
-							float dist = Vector2DotProduct(Vector2Subtract(editor.placingPos, closestFloorPos), floorUp);
-							return abs(dist) < 24.f;
-						}
-						return false;
-					};
-
 					for (int i = 0; i < game->floorsCount; i++)
 					{
-						if (IsMouseOverLine(game->floors[i].start, game->floors[i].end))
+						if (IsMouseOverLine(editor.placingPos, game->floors[i].start, game->floors[i].end))
 						{
 							game->floors[i] = game->floors[game->floorsCount - 1];
 							game->floorsCount--;
@@ -681,7 +665,7 @@ int main()
 					if (!removedSomething)
 					for (int i = 0; i < game->elevatorsCount; i++)
 					{
-						if (IsMouseOverLine(game->elevators[i].start, game->elevators[i].end))
+						if (IsMouseOverLine(editor.placingPos, game->elevators[i].start, game->elevators[i].end))
 						{
 							game->elevators[i] = game->elevators[game->elevatorsCount - 1];
 							game->elevatorsCount--;

@@ -49,20 +49,19 @@ Elevator:
 	3rd click: Set position start point moves to (hold left shift to align with axis)
 	4th click: Set position end point moves to (hold left shift to align with axis, hold left shift + left ctrl
 			to align with start point's target position)
-	When the question mark appears, press a keyboard key to set the key used to move it
+	When the question mark appears, press a keyboard key or click the mouse to set the button used to move it
 
 Danger block:
 	1st click: Set top left corner
 	2nd click: Set bottom right corner
 	3rd click: Set position the block moves to (hold left shift to align with axis)
-	When the question mark appears, press a keyboard key or click the mouse to set the key used to move it
-		(mouse click only works on danger blocks, not elevators/reversers, because I'm lazy)
+	When the question mark appears, press a keyboard key or click the mouse to set the button used to move it
 
 Reverser:
 	Right click to rotate
 	1st click: Set position
 	2nd click: Set position it moves to (hold left shift to align with axis)
-	When the question mark appears, press a keyboard key to set the key used to move it
+	When the question mark appears, press a keyboard key or click the mouse to set the key used to move it
 
 Camera trigger:
 	1st click: Set top left corner of trigger box
