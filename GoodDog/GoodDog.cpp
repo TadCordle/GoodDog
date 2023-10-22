@@ -1,4 +1,5 @@
 #include "Game.h"
+#include <stdio.h>
 
 #define PLAY_MUSIC 1
 
@@ -1250,8 +1251,10 @@ int main()
 				DrawTextEx(font, winText, { 640.f - winTextWidth / 2, 320.f }, 80, 0, BLACK);
 				DrawTextEx(font, winText, { 643.f - winTextWidth / 2, 323.f }, 80, 0, WHITE);
 
+#ifndef PLATFORM_WEB
 				DrawTextEx(font, winDetailsText, Vector2Subtract({ 640.f, 470.f }, Vector2Scale(winDetailsSize, 0.5f)), 40, 0, BLACK);
 				DrawTextEx(font, winDetailsText, Vector2Subtract({ 642.f, 472.f }, Vector2Scale(winDetailsSize, 0.5f)), 40, 0, WHITE);
+#endif
 			}
 			else if (state == EDITOR)
 			{

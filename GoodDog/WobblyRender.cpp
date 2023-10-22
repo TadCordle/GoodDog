@@ -1,7 +1,5 @@
 #include "WobblyRender.h"
 
-#define UINT32_MAX 0xffffffffui32
-
 int pcg_hash(int input)
 {
 	int state = input * 747796405u + 2891336453u;
@@ -11,7 +9,7 @@ int pcg_hash(int input)
 
 float hash_float(int seed)
 {
-	return (float)pcg_hash(seed) / (float)UINT32_MAX * 2.f;
+	return (float)pcg_hash(seed) / (float)0xffffffffu * 2.f;
 }
 
 void WobblyTexture::Update(float dt, float wobbleRate)
