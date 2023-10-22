@@ -618,7 +618,7 @@ bool IsMouseOverLine(Vector2 cursor, Vector2 start, Vector2 end)
 	{
 		Vector2 closestFloorPos = Vector2Lerp(start, end, mouseXToFloor / floorLength + 0.5f);
 		float dist = Vector2DotProduct(Vector2Subtract(cursor, closestFloorPos), floorUp);
-		return abs(dist) < 24.f;
+		return fabs(dist) < 24.f;
 	}
 	return false;
 }

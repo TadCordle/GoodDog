@@ -2,9 +2,6 @@
 
 #include "raylib.h"
 #include "raymath.h"
-#include <assert.h>
-#include <stdio.h>
-#include <stdint.h>
 
 struct StringAndColor
 {

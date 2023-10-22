@@ -2,6 +2,8 @@
 
 #define PLAY_MUSIC 1
 
+#define FLT_MAX 3.402823466e+38F
+
 int main()
 {
 	InitWindow(1280, 720, "Good Dog");

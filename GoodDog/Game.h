@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <stdio.h>
 #include "raylib.h"
 #include "WobblyRender.h"
