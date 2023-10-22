@@ -2,7 +2,7 @@
 
 void Game::AddFloor(Vector2 start, Vector2 end)
 {
-	if (floorsCount < 256)
+	if (floorsCount < MAX_FLOORS)
 		floors[floorsCount++] = Floor(start, end);
 	else
 		printf("Floor limit hit!\n");
@@ -10,7 +10,7 @@ void Game::AddFloor(Vector2 start, Vector2 end)
 
 void Game::AddCurve(Vector2 pos, CurveType type)
 {
-	if (curvesCount < 256)
+	if (curvesCount < MAX_CURVES)
 		curves[curvesCount++] = Curve(pos, type);
 	else
 		printf("Curve limit hit!\n");
@@ -18,7 +18,7 @@ void Game::AddCurve(Vector2 pos, CurveType type)
 
 void Game::AddElevator(Vector2 start, Vector2 end, Vector2 newStart, Vector2 newEnd, float travelTime, Button button)
 {
-	if (elevatorsCount < 256)	
+	if (elevatorsCount < MAX_ELEVATORS)
 		elevators[elevatorsCount++] = Elevator(start, end, newStart, newEnd, travelTime, button);
 	else
 		printf("Elevator limit hit!\n");
@@ -26,7 +26,7 @@ void Game::AddElevator(Vector2 start, Vector2 end, Vector2 newStart, Vector2 new
 
 void Game::AddDangerBlock(Vector2 pos1, Vector2 pos2, Vector2 size, Button button)
 {
-	if (dangerBlocksCount < 256)
+	if (dangerBlocksCount < MAX_DANGERBLOCKS)
 		dangerBlocks[dangerBlocksCount++] = DangerBlock(pos1, pos2, size, button);
 	else
 		printf("Danger block limit hit!\n");
@@ -34,7 +34,7 @@ void Game::AddDangerBlock(Vector2 pos1, Vector2 pos2, Vector2 size, Button butto
 
 void Game::AddReverser(Vector2 pos1, Vector2 pos2, Direction dir, Button button)
 {
-	if (reversersCount < 256)
+	if (reversersCount < MAX_REVERSERS)
 		reversers[reversersCount++] = Reverser(pos1, pos2, dir, button);
 	else
 		printf("Reverser limit hit!\n");
@@ -42,7 +42,7 @@ void Game::AddReverser(Vector2 pos1, Vector2 pos2, Direction dir, Button button)
 
 void Game::AddCameraZone(Vector2 pos, Vector2 size, Camera2D params)
 {
-	if (cameraZonesCount < 256)
+	if (cameraZonesCount < MAX_CAMERAZONES)
 		cameraZones[cameraZonesCount++] = CameraZone(pos, size, params);
 	else
 		printf("Camera zone limit hit!\n");
@@ -50,7 +50,7 @@ void Game::AddCameraZone(Vector2 pos, Vector2 size, Camera2D params)
 
 void Game::AddPrompt(Vector2 pos, Button button)
 {
-	if (promptsCount < 256)
+	if (promptsCount < MAX_PROMPTS)
 		prompts[promptsCount++] = Prompt(pos, button);
 	else
 		printf("Prompt limit hit!\n");
@@ -58,7 +58,7 @@ void Game::AddPrompt(Vector2 pos, Button button)
 
 void Game::AddItem(Vector2 pos, ItemType itemType)
 {
-	if (itemsCount < 256)
+	if (itemsCount < MAX_ITEMS)
 		items[itemsCount++] = Item(pos, itemType);
 	else
 		printf("Item limit hit!\n");
@@ -66,7 +66,7 @@ void Game::AddItem(Vector2 pos, ItemType itemType)
 
 void Game::AddCheckpoint(Vector2 pos, float musicStartTime, bool dogFlipped)
 {
-	if (checkpointsCount < 256)
+	if (checkpointsCount < MAX_CHECKPOINTS)
 		checkpoints[checkpointsCount++] = Checkpoint(pos, musicStartTime, dogFlipped);
 	else
 		printf("Checkpoint limit hit!\n");

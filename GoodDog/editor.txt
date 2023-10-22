@@ -32,6 +32,7 @@ Controls
 
 - Left click:	Place equipped object
 - Right click:	Delete hovered object (unless you have curve, reverser, or item equipped)
+- F7:			Show/hide limits (you can place a maximum of 1024 of each type of object)
 
 Each object type has specific creation steps.
 

@@ -9,6 +9,16 @@
 #define WALL_WOBBLE_RATE 0.75f
 #define HOP_TIMER 0.833333333333
 
+#define MAX_FLOORS 1024
+#define MAX_CURVES 1024
+#define MAX_ELEVATORS 1024
+#define MAX_DANGERBLOCKS 1024
+#define MAX_REVERSERS 1024
+#define MAX_CAMERAZONES 1024
+#define MAX_PROMPTS 1024
+#define MAX_ITEMS 1024
+#define MAX_CHECKPOINTS 1024
+
 enum Button {
 	None = 0,
 	Cancel = 1,
@@ -208,15 +218,15 @@ enum GameState
 
 struct Game
 {
-	Floor floors[256] = {};
-	Curve curves[256] = {};
-	DangerBlock dangerBlocks[256] = {};
-	Elevator elevators[256] = {};
-	Reverser reversers[256] = {};
-	CameraZone cameraZones[256] = {};
-	Prompt prompts[256] = {};
-	Item items[256] = {};
-	Checkpoint checkpoints[256] = {};
+	Floor floors[MAX_FLOORS] = {};
+	Curve curves[MAX_CURVES] = {};
+	DangerBlock dangerBlocks[MAX_DANGERBLOCKS] = {};
+	Elevator elevators[MAX_ELEVATORS] = {};
+	Reverser reversers[MAX_REVERSERS] = {};
+	CameraZone cameraZones[MAX_CAMERAZONES] = {};
+	Prompt prompts[MAX_PROMPTS] = {};
+	Item items[MAX_ITEMS] = {};
+	Checkpoint checkpoints[MAX_CHECKPOINTS] = {};
 
 	int floorsCount = 0;
 	int reversersCount = 0;
@@ -273,6 +283,7 @@ struct EditorState
 	Vector2 v4 = {};
 	float v5 = 0.f;
 	Button button = Button::None;
+	bool showLimits = false;
 
 	void UpdatePlacing(AssetType at) { placingAsset = at; placingStep = 0; };
 };

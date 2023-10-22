@@ -577,6 +577,10 @@ int main()
 				}
 			}
 
+			// Toggle limits
+			if (IsKeyPressed(KeyboardKey::KEY_F7))
+				editor.showLimits = !editor.showLimits;
+
 			// Zoom
 			float mouseWheel = GetMouseWheelMove();
 			if (mouseWheel != 0.f)
@@ -1246,6 +1250,21 @@ int main()
 
 				DrawTextEx(font, winDetailsText, Vector2Subtract({ 640.f, 470.f }, Vector2Scale(winDetailsSize, 0.5f)), 40, 0, BLACK);
 				DrawTextEx(font, winDetailsText, Vector2Subtract({ 642.f, 472.f }, Vector2Scale(winDetailsSize, 0.5f)), 40, 0, WHITE);
+			}
+			else if (state == EDITOR)
+			{
+				if (editor.showLimits)
+				{
+					DrawText(TextFormat("Floors: %d/%d", game->floorsCount, MAX_FLOORS), 10, 10, 20, YELLOW);
+					DrawText(TextFormat("Curves: %d/%d", game->curvesCount, MAX_CURVES), 10, 40, 20, YELLOW);
+					DrawText(TextFormat("Elevators: %d/%d", game->elevatorsCount, MAX_ELEVATORS), 10, 70, 20, YELLOW);
+					DrawText(TextFormat("Danger blocks: %d/%d", game->dangerBlocksCount, MAX_DANGERBLOCKS), 10, 100, 20, YELLOW);
+					DrawText(TextFormat("Reversers: %d/%d", game->reversersCount, MAX_REVERSERS), 10, 130, 20, YELLOW);
+					DrawText(TextFormat("Camera zones: %d/%d", game->cameraZonesCount, MAX_CAMERAZONES), 10, 160, 20, YELLOW);
+					DrawText(TextFormat("Prompts: %d/%d", game->promptsCount, MAX_PROMPTS), 10, 190, 20, YELLOW);
+					DrawText(TextFormat("Items: %d/%d", game->itemsCount, MAX_ITEMS), 10, 220, 20, YELLOW);
+					DrawText(TextFormat("Checkpoints: %d/%d", game->checkpointsCount, MAX_CHECKPOINTS), 10, 250, 20, YELLOW);
+				}
 			}
 
 			//DrawFPS(10, 10);
